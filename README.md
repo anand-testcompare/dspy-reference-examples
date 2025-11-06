@@ -19,10 +19,19 @@ Unlike traditional prompt engineering (LangChain, manual prompting), DSPy **auto
 
 - Python 3.8+
 - OpenAI API key (for gpt-4o-mini)
+- UV package manager (recommended) or pip
 
 ### Setup
 
 1. **Install dependencies:**
+
+Using UV (recommended - much faster):
+```bash
+uv venv
+uv pip install -r requirements.txt
+```
+
+Or using pip:
 ```bash
 pip install -r requirements.txt
 ```
