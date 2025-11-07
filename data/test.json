@@ -1,0 +1,102 @@
+[
+  {
+    "complaint": "I've been on Ozempic for 6 months and developed gallstones. Had severe right upper quadrant pain and needed surgery to remove gallbladder.",
+    "label": "Adverse Event",
+    "reasoning": "Reports serious adverse event (cholelithiasis) requiring surgical intervention, a known risk with GLP-1 agonists."
+  },
+  {
+    "complaint": "Patient reported persistent nausea, vomiting and developed aspiration pneumonia after vomiting. Was hospitalized for 5 days.",
+    "label": "Adverse Event",
+    "reasoning": "Describes serious complication (aspiration pneumonia) resulting from GI adverse effects of Ozempic."
+  },
+  {
+    "complaint": "Heart palpitations started after beginning Ozempic. Heart rate goes up to 120 bpm at rest. Cardiologist found new onset atrial fibrillation.",
+    "label": "Adverse Event",
+    "reasoning": "Reports cardiac adverse event (new atrial fibrillation) temporally related to Ozempic initiation."
+  },
+  {
+    "complaint": "I had a severe injection site abscess that required incision and drainage. Culture grew staph aureus. Only happened with Ozempic injections.",
+    "label": "Adverse Event",
+    "reasoning": "Describes serious infection at injection site requiring surgical intervention, an adverse event from drug administration."
+  },
+  {
+    "complaint": "My hair has been falling out excessively since starting Ozempic. Losing handfuls in the shower. Doctor says it's telogen effluvium from the medication.",
+    "label": "Adverse Event",
+    "reasoning": "Reports adverse effect (alopecia) attributed by physician to Ozempic use, affecting patient quality of life."
+  },
+  {
+    "complaint": "Experienced severe constipation for weeks followed by bowel obstruction. Had to go to ER and was admitted for 3 days while on Ozempic.",
+    "label": "Adverse Event",
+    "reasoning": "Reports serious GI complication (bowel obstruction) requiring hospitalization, potentially related to Ozempic."
+  },
+  {
+    "complaint": "Patient developed rash all over body, fever of 102F, and elevated liver enzymes after 2nd Ozempic dose. Possible drug hypersensitivity.",
+    "label": "Adverse Event",
+    "reasoning": "Describes systemic hypersensitivity reaction with organ involvement, a serious adverse drug reaction."
+  },
+  {
+    "complaint": "I feel extremely anxious and jittery since starting Ozempic 1mg. Heart races and can't sleep. Never had anxiety before this medication.",
+    "label": "Adverse Event",
+    "reasoning": "Reports new onset psychiatric and autonomic symptoms temporally related to starting Ozempic."
+  },
+  {
+    "complaint": "Developed severe muscle pain and weakness. CK level was 8000. Diagnosed with rhabdomyolysis while taking Ozempic and statin.",
+    "label": "Adverse Event",
+    "reasoning": "Reports serious adverse event (rhabdomyolysis) with lab confirmation, potentially related to drug interaction."
+  },
+  {
+    "complaint": "I had persistent vomiting for 2 weeks on Ozempic and became severely dehydrated. Blood pressure dropped and I passed out. Called 911.",
+    "label": "Adverse Event",
+    "reasoning": "Describes serious complications (dehydration, hypotension, syncope) from medication adverse effects requiring emergency care."
+  },
+  {
+    "complaint": "My Ozempic pen clicks when I dial the dose but no medication comes out. Tried 3 times with same result. Pen is defective.",
+    "label": "Product Complaint",
+    "reasoning": "Reports mechanical malfunction preventing medication delivery, a device defect without reported patient harm."
+  },
+  {
+    "complaint": "The label on my Ozempic pen is peeling off and I can't read the lot number or expiration date anymore. Quality control issue.",
+    "label": "Product Complaint",
+    "reasoning": "Describes labeling defect affecting product identification and traceability, a quality issue."
+  },
+  {
+    "complaint": "Ozempic pen arrived frozen solid despite being shipped with ice packs. Completely frozen, not just cold. Likely ruined.",
+    "label": "Product Complaint",
+    "reasoning": "Reports cold chain failure with product freezing, affecting medication potency and quality."
+  },
+  {
+    "complaint": "The protective seal on my Ozempic pen was already broken when I opened the box. Package appeared to be previously opened. Contamination risk.",
+    "label": "Product Complaint",
+    "reasoning": "Describes compromised packaging integrity raising sterility concerns, a product tampering or quality issue."
+  },
+  {
+    "complaint": "Received wrong dose strength. Box says 0.5mg but pen is labeled 1.0mg. Pharmacy dispensing error or manufacturing labeling problem.",
+    "label": "Product Complaint",
+    "reasoning": "Reports labeling mismatch or dispensing error, a product identification issue without patient use or harm."
+  },
+  {
+    "complaint": "My Ozempic pen's injection button is stuck and won't depress no matter how hard I push. Completely unable to inject dose. Mechanical failure.",
+    "label": "Product Complaint",
+    "reasoning": "Describes device mechanical failure preventing use, a product defect without adverse patient reaction."
+  },
+  {
+    "complaint": "The Ozempic solution in my pen looks cloudy instead of clear. Haven't used it. Different appearance from my usual pens. Quality concern.",
+    "label": "Product Complaint",
+    "reasoning": "Reports abnormal product appearance suggesting contamination or degradation, identified before use."
+  },
+  {
+    "complaint": "Pen injector makes a grinding noise when I dial the dose. Sounds broken. Worried it won't deliver the right amount. Just opened brand new pen.",
+    "label": "Product Complaint",
+    "reasoning": "Describes abnormal device operation suggesting mechanical defect, a quality issue affecting confidence in dosing."
+  },
+  {
+    "complaint": "My Ozempic box contains the wrong needle size. All needles are 8mm but I was prescribed 4mm needles. Can't use these safely.",
+    "label": "Product Complaint",
+    "reasoning": "Reports incorrect component packaging, a dispensing or product configuration error without patient harm."
+  },
+  {
+    "complaint": "The user manual in my Ozempic kit is for a different Novo Nordisk product (Victoza). Wrong instructions entirely. Major packaging error.",
+    "label": "Product Complaint",
+    "reasoning": "Describes serious labeling/packaging error with incorrect product instructions, a regulatory compliance issue."
+  }
+]

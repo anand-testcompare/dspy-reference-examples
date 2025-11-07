@@ -1,135 +1,161 @@
 # DSPy Reference Examples
 
-Real-world examples demonstrating DSPy's unique capabilities in pharma/medtech applications.
+Real-world DSPy workflows for pharma/medtech teams. The current module focuses on Ozempic complaint triage (Adverse Event vs Product Complaint) and shows how to:
 
-## Example 1: Ozempic Complaint Classification
+- Programmatically optimize a prompt with DSPy
+- Persist the tuned artifact to disk (separate from source)
+- Serve the classifier via FastAPI with typed Pydantic contracts
 
-Automatically classify incoming reports about Novo Nordisk's Ozempic (semaglutide) as either:
-- **Adverse Events** (patient safety issues, medical reactions)
-- **Product Complaints** (device defects, quality issues)
+---
 
-### Why DSPy?
+## Requirements
 
-Unlike traditional prompt engineering (LangChain, manual prompting), DSPy **automatically optimizes** your classifier by:
-- Learning the best few-shot examples from your training data
-- Optimizing prompt instructions for your specific task
-- Improving accuracy without manual prompt tweaking
+- Python 3.10+
+- [`uv`](https://docs.astral.sh/uv/) (recommended) or any virtualenv tooling
+- OpenAI-compatible API key
+  - Default provider: [OpenRouter](https://openrouter.ai/) using `openai/gpt-oss-120b`
+  - Override via environment variables without touching code
 
-### Requirements
+### Environment variables
 
-- Python 3.8+
-- OpenAI API key (for gpt-4o-mini)
-- UV package manager (recommended) or pip
+| Variable | Description | Default |
+| --- | --- | --- |
+| `OPENROUTER_API_KEY` | Primary key used for the default OpenRouter setup | — |
+| `OPENAI_API_KEY` / `DSPY_API_KEY` | Optional override for native OpenAI or custom key | — |
+| `DSPY_MODEL_NAME` | Model identifier passed to DSPy | `openai/gpt-oss-120b` |
+| `DSPY_API_BASE` | Base URL for the model provider | `https://openrouter.ai/api/v1` when using OpenRouter |
+| `DSPY_HTTP_HEADERS` | JSON blob for extra HTTP headers | `{}` |
+| `OPENROUTER_HTTP_REFERER`, `OPENROUTER_APP_TITLE` | Convenience headers for OpenRouter analytics | — |
 
-### Setup
+Copy `.env.example` and fill in whichever keys you need:
 
-1. **Install dependencies:**
-
-Using UV (recommended - much faster):
-```bash
-uv venv
-uv pip install -r requirements.txt
-```
-
-Or using pip:
-```bash
-pip install -r requirements.txt
-```
-
-2. **Set your OpenAI API key:**
-
-Option A - Environment variable:
-```bash
-export OPENAI_API_KEY='your-api-key-here'
-```
-
-Option B - Create `.env` file:
 ```bash
 cp .env.example .env
-# Edit .env and add your API key
 ```
 
-### Running the Example
+---
+
+## Project Setup
 
 ```bash
-python ozempic_classifier.py
+uv venv                     # or python -m venv .venv
+source .venv/bin/activate
+uv pip install -e .         # installs dependencies from pyproject
+python3 scripts/generate_sample_data.py  # creates data/train.json & data/test.json
 ```
 
-This will:
-1. Load 20 training examples and 20 test examples
-2. Evaluate baseline (unoptimized) classifier
-3. Run DSPy optimization (~2-3 minutes)
-4. Evaluate optimized classifier
-5. Show before/after comparison
-6. Save optimized model to `ozempic_classifier_optimized.json`
-
-### Example Output
+This creates a clean layout:
 
 ```
-🔵 BASELINE PERFORMANCE (No Optimization)
-Accuracy: 14/20 = 70.0%
-
-🔄 OPTIMIZING WITH DSPy...
-✓ Optimization complete!
-
-🟢 OPTIMIZED PERFORMANCE
-Accuracy: 18/20 = 90.0%
-
-FINAL RESULTS SUMMARY
-Baseline Accuracy:   70.0%
-Optimized Accuracy:  90.0%
-Improvement:         +20.0%
+.
+├── artifacts/                      # Saved DSPy artifacts (git-tracked)
+├── data/                           # Synthetic train/test data
+├── scripts/                        # Utility scripts (data generation)
+├── src/
+│   ├── api/                        # FastAPI app
+│   ├── common/                     # Shared logic (config, datasets, classifier)
+│   ├── pipeline/                   # Optimization pipeline
+│   └── serving/                    # Pydantic request/response + helpers
+└── inference_demo.py               # Simple batch inference helper
 ```
 
-### Project Structure
+---
 
-```
-dspy-reference-examples/
-├── README.md                          # This file
-├── requirements.txt                   # Python dependencies
-├── .env.example                       # API key template
-├── data_generator.py                  # Synthetic Ozempic complaint data
-├── ozempic_classifier.py              # Main DSPy classifier
-└── ozempic_classifier_optimized.json  # Saved optimized model (after running)
+## 1. Optimize / Refresh the Classifier
+
+```bash
+python -m src.pipeline.main
 ```
 
-### What Makes This Example Realistic?
+The run will:
+1. Configure DSPy with your provider settings.
+2. Load `data/train.json` / `data/test.json`.
+3. Evaluate the baseline classifier.
+4. Optimize via `BootstrapFewShotWithRandomSearch`.
+5. Evaluate the optimized program.
+6. Write the artifact to `artifacts/ozempic_classifier_optimized.json`.
 
-The training data includes actual scenarios pharma companies face:
+Running the pipeline is idempotent—rerun whenever you update data or want to swap underlying LMs.
 
-**Adverse Events:**
-- Serious reactions (pancreatitis, thyroid issues)
-- GI side effects (nausea, vomiting)
-- Allergic reactions
-- Injection site reactions
+---
 
-**Product Complaints:**
-- Pen mechanism failures
-- Dose counter defects
-- Packaging damage
-- Cold chain failures
-- Labeling errors
+## 2. Serve the Classifier via FastAPI
 
-### How DSPy Optimization Works
+```bash
+uvicorn src.api.app:app --reload
+```
 
-1. **Baseline:** Uses zero-shot prompting with just the signature description
-2. **Optimization:** DSPy tries different combinations of:
-   - Few-shot examples (which training examples work best?)
-   - Prompt instructions (how to describe the task?)
-3. **Result:** Automatically finds the best configuration for your specific classification task
+- Swagger/OpenAPI UI: `http://localhost:8000/docs`
+- Health endpoint: `GET /health`
+- Classification endpoint: `POST /classify` (uses the same Pydantic models as the internal service layer)
 
-### Cost Estimate
+Example request body (auto-populated in Swagger):
 
-- Training: ~$0.10-0.20 (one-time optimization)
-- Inference: ~$0.001 per classification
+```json
+{
+  "complaint": "My Ozempic pen arrived cracked and leaked everywhere.",
+  "model_path": null
+}
+```
 
-### Next Steps
+Example `curl` invocation:
 
-This example demonstrates classification only. Future examples will add:
-- Extraction of structured data from adverse events
-- Multi-stage pipelines (classify → extract → assess severity)
-- Model portability (switching between OpenAI, Anthropic, local models)
+```bash
+curl -X POST http://localhost:8000/classify \
+     -H "Content-Type: application/json" \
+     -d '{
+           "complaint": "After injecting Ozempic I had severe hives and needed an EpiPen.",
+           "model_path": null
+         }'
+```
 
-### License
+Response structure:
 
-MIT License - See LICENSE file for details
+```json
+{
+  "classification": "Adverse Event",
+  "justification": "Describes a systemic allergic reaction following Ozempic use."
+}
+```
+
+If the artifact is missing, the API returns `503 Service Unavailable` with instructions to rerun the pipeline.
+
+---
+
+## 3. Use the Pydantic Interface Directly
+
+```python
+from dotenv import load_dotenv
+from src.common.config import configure_lm
+from src.serving.service import ComplaintRequest, get_classification_function
+
+load_dotenv()
+configure_lm()
+predict = get_classification_function()
+
+payload = ComplaintRequest(complaint="Pen arrived with a broken dose dial.")
+result = predict(payload)
+print(result.classification, result.justification)
+```
+
+Pass `model_path="artifacts/ozempic_classifier_optimized.json"` (or another artifact) to pin a different tuned model per tenant or use-case.
+
+---
+
+## Demo Script
+
+`python inference_demo.py` executes a small batch of complaints through the shared interface and prints latency/throughput stats. Useful for quick smoke tests after retraining.
+
+---
+
+## Notes & Next Steps
+
+- Replace `data/*.json` with real labeled datasets or update `src/common/data_utils.py` to read from your storage systems.
+- Add additional pipelines (extraction, severity grading, etc.) by following the same pattern: shared logic in `src/common`, tuning flows in `src/pipeline`, serving code in `src/api`/`src/serving`.
+- The LM client is OpenAI-compatible; switching to Anthropic, Azure OpenAI, or self-hosted proxies is just a matter of environment variables.
+
+---
+
+## License
+
+MIT – see `LICENSE` for details.

@@ -1,7 +1,15 @@
 """
-Generate synthetic training data for Ozempic complaint classification.
-Mix of Adverse Events and Product Complaints.
+Generate synthetic training/test data for the Ozempic classifier example.
 """
+
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+DATA_DIR = Path(__file__).resolve().parent.parent / "data"
+TRAIN_FILE = DATA_DIR / "train.json"
+TEST_FILE = DATA_DIR / "test.json"
 
 def generate_training_data():
     """Generate labeled training examples for Ozempic complaints."""
@@ -225,3 +233,26 @@ def generate_test_data():
     ]
 
     return test_data
+
+
+def write_datasets(train_path: Path = TRAIN_FILE, test_path: Path = TEST_FILE) -> None:
+    """Write the synthetic datasets to disk."""
+
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+
+    with train_path.open("w", encoding="utf-8") as train_fp:
+        json.dump(generate_training_data(), train_fp, indent=2, ensure_ascii=False)
+
+    with test_path.open("w", encoding="utf-8") as test_fp:
+        json.dump(generate_test_data(), test_fp, indent=2, ensure_ascii=False)
+
+    print(f"✓ Wrote training data to {train_path}")
+    print(f"✓ Wrote test data to {test_path}")
+
+
+def main():
+    write_datasets()
+
+
+if __name__ == "__main__":
+    main()
