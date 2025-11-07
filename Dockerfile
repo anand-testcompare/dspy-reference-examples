@@ -21,7 +21,7 @@ FROM python:3.12-slim AS runtime
 
 ENV PYTHONUNBUFFERED=1 \
     PATH="/app/.venv/bin:${PATH}" \
-    PYTHONPATH="/app/src"
+    PYTHONPATH="/app"
 
 WORKDIR /app
 
@@ -32,4 +32,4 @@ COPY pyproject.toml uv.lock README.md ./
 
 EXPOSE 8080
 
-CMD ["sh", "-c", "uvicorn api.app:app --host 0.0.0.0 --port ${PORT:-8080}"]
+CMD ["sh", "-c", "uvicorn src.api.app:app --host 0.0.0.0 --port ${PORT:-8080}"]
