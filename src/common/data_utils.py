@@ -14,7 +14,7 @@ from .paths import TRAIN_DATA_PATH, TEST_DATA_PATH
 def _load_split(path: Path) -> List[dict]:
     if not path.exists():
         raise FileNotFoundError(
-            f"Dataset file '{path}' is missing. Run 'python scripts/generate_sample_data.py' first."
+            f"Dataset file '{path}' is missing. Run 'python scripts/generate_sample_data_ozempic_pc_vs_ae.py' first."
         )
 
     with path.open("r", encoding="utf-8") as fp:
@@ -39,4 +39,4 @@ def prepare_datasets() -> Tuple[list[dspy.Example], list[dspy.Example]]:
     return _to_examples(train_raw), _to_examples(test_raw)
 
 
-__all__ = ["prepare_datasets", "DATA_DIR", "TRAIN_PATH", "TEST_PATH"]
+__all__ = ["prepare_datasets"]

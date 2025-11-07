@@ -65,5 +65,21 @@
   "ruff.organizeImports": true,
   "editor.rulers": [120],
   "python.analysis.typeCheckingMode": "basic",
-  "python.analysis.autoImportCompletions": true
+  "python.analysis.autoImportCompletions": true,
+  "python.analysis.diagnosticMode": "workspace",
+  "[markdown]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.markdownlint": "explicit"
+    }
+  },
+  "prettier.printWidth": 120,
+  "prettier.proseWrap": "always",
+  "markdownlint.config": {
+    "default": true,
+    "MD013": {
+      "line_length": 120
+    }
+  }
 }

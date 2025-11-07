@@ -12,7 +12,9 @@ configure_lm()
 try:
     predict = get_classification_function()
 except FileNotFoundError:
-    raise SystemExit("Optimized artifact missing. Run 'uv run python -m src.pipeline.main' before running this demo.")
+    raise SystemExit(
+        "Optimized artifact missing. Run 'uv run python -m src.pipeline.main' before running this demo."
+    ) from None
 
 new_complaints = [
     {

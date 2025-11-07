@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, HTTPException, status
 
 from ..common.config import configure_lm
@@ -11,18 +13,10 @@ from ..serving.service import (
     get_classification_function,
 )
 
-app = FastAPI(
-    title="DSPy Complaint Classifier API",
-    version="0.2.0",
-    description=(
-        "Classify Ozempic-related complaints as Adverse Events or Product Complaints. "
-        "Run the optimization pipeline to refresh the underlying prompt artifact."
-    ),
-)
+@asynccontextmanager
+async def _lifespan(app: FastAPI):
+    """Load the predictor at startup so TestClient + ASGI servers share logic."""
 
-
-@app.on_event("startup")
-def _startup() -> None:
     configure_lm()
     try:
         app.state.predictor = get_classification_function()
@@ -30,6 +24,18 @@ def _startup() -> None:
     except FileNotFoundError as exc:
         app.state.predictor = None
         app.state.startup_error = exc
+    yield
+
+
+app = FastAPI(
+    title="DSPy Complaint Classifier API",
+    version="0.2.0",
+    description=(
+        "Classify Ozempic-related complaints as Adverse Events or Product Complaints. "
+        "Run the optimization pipeline to refresh the underlying prompt artifact."
+    ),
+    lifespan=_lifespan,
+)
 
 
 @app.get("/health", tags=["system"], summary="Health check")

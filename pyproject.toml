@@ -19,6 +19,14 @@ dependencies = [
 requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+markers = [
+  "integration: tests that hit real LLMs or external services",
+]
+log_cli = true
+log_cli_level = "INFO"
+
 [tool.ruff]
 line-length = 120
 target-version = "py312"
