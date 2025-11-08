@@ -6,19 +6,19 @@ import logging
 import os
 from pathlib import Path
 
-from fastapi.testclient import TestClient
 import httpx
 import pytest
+from fastapi.testclient import TestClient
 
 # Ensure DSPy cache writes land inside the repo workspace (and stay writable).
 DSPY_CACHE_DIR = Path("data/.dspy_cache")
 DSPY_CACHE_DIR.mkdir(parents=True, exist_ok=True)
 os.environ.setdefault("DSPY_CACHEDIR", str(DSPY_CACHE_DIR))
 
-from src.api.app import app
-from src.common.config import configure_lm
-from src.serving.service import ComplaintRequest, get_classification_function
-
+# Imports must come after environment setup
+from src.api.app import app  # noqa: E402
+from src.common.config import configure_lm  # noqa: E402
+from src.serving.service import ComplaintRequest, get_classification_function  # noqa: E402
 
 logger = logging.getLogger(__name__)
 
@@ -50,9 +50,7 @@ def _invoke_llm(predictor, payload: ComplaintRequest):
 def test_predictor_classifies_complaint():
     predictor = _ensure_predictor()
 
-    payload = ComplaintRequest(
-        complaint="After injecting Ozempic my throat started swelling and I needed an EpiPen."
-    )
+    payload = ComplaintRequest(complaint="After injecting Ozempic my throat started swelling and I needed an EpiPen.")
     response = _invoke_llm(predictor, payload)
 
     assert response.classification in {"Adverse Event", "Product Complaint"}

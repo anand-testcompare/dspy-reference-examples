@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import json
-from typing import Dict, Optional
 
 import dspy
 from pydantic import BaseModel, Field
@@ -23,23 +22,23 @@ class EnvironmentSettings(BaseSettings):
     )
 
     model_name: str = Field(DEFAULT_MODEL, alias="DSPY_MODEL_NAME")
-    dspy_api_key: Optional[str] = Field(None, alias="DSPY_API_KEY")
-    openrouter_api_key: Optional[str] = Field(None, alias="OPENROUTER_API_KEY")
-    openai_api_key: Optional[str] = Field(None, alias="OPENAI_API_KEY")
-    dspy_api_base: Optional[str] = Field(None, alias="DSPY_API_BASE")
-    openrouter_api_base: Optional[str] = Field(None, alias="OPENROUTER_API_BASE")
-    raw_http_headers: Optional[str] = Field(None, alias="DSPY_HTTP_HEADERS")
-    openrouter_http_referer: Optional[str] = Field(None, alias="OPENROUTER_HTTP_REFERER")
-    openrouter_app_title: Optional[str] = Field(None, alias="OPENROUTER_APP_TITLE")
+    dspy_api_key: str | None = Field(None, alias="DSPY_API_KEY")
+    openrouter_api_key: str | None = Field(None, alias="OPENROUTER_API_KEY")
+    openai_api_key: str | None = Field(None, alias="OPENAI_API_KEY")
+    dspy_api_base: str | None = Field(None, alias="DSPY_API_BASE")
+    openrouter_api_base: str | None = Field(None, alias="OPENROUTER_API_BASE")
+    raw_http_headers: str | None = Field(None, alias="DSPY_HTTP_HEADERS")
+    openrouter_http_referer: str | None = Field(None, alias="OPENROUTER_HTTP_REFERER")
+    openrouter_app_title: str | None = Field(None, alias="OPENROUTER_APP_TITLE")
 
 
 class LLMConfig(BaseModel):
     """Runtime configuration for the underlying language model."""
 
     model: str = DEFAULT_MODEL
-    api_key: Optional[str] = None
-    api_base: Optional[str] = None
-    headers: Dict[str, str] = Field(default_factory=dict)
+    api_key: str | None = None
+    api_base: str | None = None
+    headers: dict[str, str] = Field(default_factory=dict)
 
     @property
     def is_openrouter(self) -> bool:
@@ -47,10 +46,10 @@ class LLMConfig(BaseModel):
         return "openrouter" in base
 
 
-def _load_extra_headers(env: EnvironmentSettings) -> Dict[str, str]:
+def _load_extra_headers(env: EnvironmentSettings) -> dict[str, str]:
     """Build extra headers from env (JSON or individual fields)."""
 
-    headers: Dict[str, str] = {}
+    headers: dict[str, str] = {}
 
     if env.raw_http_headers:
         try:

@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from functools import lru_cache
 from pathlib import Path
-from typing import Callable, Optional
 
 import dspy
 from pydantic import BaseModel, ConfigDict, Field
@@ -17,7 +17,7 @@ class ComplaintRequest(BaseModel):
     """Inbound payload for running a classification."""
 
     complaint: str = Field(..., description="Raw complaint text")
-    model_path: Optional[str] = Field(
+    model_path: str | None = Field(
         default=None,
         description="Optional override for the optimized model artifact",
     )
@@ -51,7 +51,7 @@ def _cached_classifier(model_path: Path) -> ComplaintClassifier:
 
 
 def get_classification_function(
-    model_path: Optional[Path] = None,
+    model_path: Path | None = None,
     use_cache: bool = True,
 ) -> Callable[[ComplaintRequest], ComplaintResponse]:
     """Return a callable that takes a ComplaintRequest and returns a ComplaintResponse."""

@@ -4,14 +4,13 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import List, Tuple
 
 import dspy
 
-from .paths import TRAIN_DATA_PATH, TEST_DATA_PATH
+from .paths import TEST_DATA_PATH, TRAIN_DATA_PATH
 
 
-def _load_split(path: Path) -> List[dict]:
+def _load_split(path: Path) -> list[dict]:
     if not path.exists():
         raise FileNotFoundError(
             f"Dataset file '{path}' is missing. Run 'python scripts/generate_sample_data_ozempic_pc_vs_ae.py' first."
@@ -21,13 +20,13 @@ def _load_split(path: Path) -> List[dict]:
         return json.load(fp)
 
 
-def prepare_datasets() -> Tuple[list[dspy.Example], list[dspy.Example]]:
+def prepare_datasets() -> tuple[list[dspy.Example], list[dspy.Example]]:
     """Load training/test datasets and convert them into DSPy Examples."""
 
     train_raw = _load_split(TRAIN_DATA_PATH)
     test_raw = _load_split(TEST_DATA_PATH)
 
-    def _to_examples(raw_batch: List[dict]) -> list[dspy.Example]:
+    def _to_examples(raw_batch: list[dict]) -> list[dspy.Example]:
         return [
             dspy.Example(
                 complaint=item["complaint"],

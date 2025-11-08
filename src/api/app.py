@@ -13,6 +13,7 @@ from ..serving.service import (
     get_classification_function,
 )
 
+
 @asynccontextmanager
 async def _lifespan(app: FastAPI):
     """Load the predictor at startup so TestClient + ASGI servers share logic."""

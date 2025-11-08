@@ -73,7 +73,7 @@ def run_pipeline() -> None:
     model_name = dspy.settings.lm.model if dspy.settings.lm else None
     if model_name:
         print(f"Including model information: {model_name}")
-        with open(DEFAULT_CLASSIFIER_PATH, "r") as f:
+        with open(DEFAULT_CLASSIFIER_PATH) as f:
             artifact_data = json.load(f)
 
         # Ensure metadata section exists
