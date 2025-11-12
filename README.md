@@ -136,7 +136,8 @@ The run will:
 
 Running the pipeline is idempotent—rerun whenever you update data or want to swap underlying LMs.
 
-> **Note:** For a complete guide on working with multiple classification types, see [CLASSIFICATION_GUIDE.md](CLASSIFICATION_GUIDE.md).
+> **Note:** For a complete guide on working with multiple classification types, see
+> [CLASSIFICATION_GUIDE.md](CLASSIFICATION_GUIDE.md).
 
 ---
 
@@ -150,29 +151,28 @@ uv run uvicorn src.api.app:app --reload
 - Swagger/OpenAPI UI: `http://localhost:8000/docs`
 - ReDoc UI: `http://localhost:8000/redoc`
 - Health endpoint: `GET /health`
-- Classification endpoint: `POST /classify` (uses the same Pydantic models as the internal service layer)
 
-Example request body (auto-populated in Swagger):
+### Classification Endpoints
 
-```json
-{
-  "complaint": "My Ozempic pen arrived cracked and leaked everywhere.",
-  "model_path": null
-}
-```
+The API provides three classification endpoints:
 
-Example `curl` invocation:
+1. **`POST /classify/ae-pc`** - Classify as Adverse Event or Product Complaint (first-stage classification)
+2. **`POST /classify/ae-category`** - Classify adverse events into specific medical categories (e.g., Gastrointestinal
+   disorders, Pancreatitis, Hypoglycemia)
+3. **`POST /classify/pc-category`** - Classify product complaints into quality/defect categories (e.g., Device
+   malfunction, Packaging defect)
+
+#### Example: AE vs PC Classification
 
 ```bash
-curl -X POST http://localhost:8000/classify \
+curl -X POST http://localhost:8000/classify/ae-pc \
      -H "Content-Type: application/json" \
      -d '{
-           "complaint": "After injecting Ozempic I had severe hives and needed an EpiPen.",
-           "model_path": null
+           "complaint": "After injecting Ozempic I had severe hives and needed an EpiPen."
          }'
 ```
 
-Response structure:
+Response:
 
 ```json
 {
@@ -181,7 +181,27 @@ Response structure:
 }
 ```
 
-If the artifact is missing, the API returns `503 Service Unavailable` with instructions to rerun the pipeline.
+#### Example: AE Category Classification
+
+```bash
+curl -X POST http://localhost:8000/classify/ae-category \
+     -H "Content-Type: application/json" \
+     -d '{
+           "adverse_event": "I experienced severe nausea and vomiting after taking Ozempic."
+         }'
+```
+
+#### Example: PC Category Classification
+
+```bash
+curl -X POST http://localhost:8000/classify/pc-category \
+     -H "Content-Type: application/json" \
+     -d '{
+           "product_complaint": "The pen arrived with a cracked dose dial."
+         }'
+```
+
+If an artifact is missing, the API returns `503 Service Unavailable` with instructions to rerun the pipeline.
 
 ---
 
