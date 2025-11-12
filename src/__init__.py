@@ -10,9 +10,14 @@ from .common import (
     prepare_datasets,
 )
 from .serving.service import (
+    AECategoryRequest,
+    AEPCRequest,
     ComplaintRequest,
     ComplaintResponse,
-    get_classification_function,
+    PCCategoryRequest,
+    get_ae_category_classifier,
+    get_ae_pc_classifier,
+    get_pc_category_classifier,
 )
 
 __all__ = [
@@ -24,6 +29,11 @@ __all__ = [
     "evaluate_model",
     "prepare_datasets",
     "ComplaintRequest",
+    "AEPCRequest",
+    "AECategoryRequest",
+    "PCCategoryRequest",
     "ComplaintResponse",
-    "get_classification_function",
+    "get_ae_pc_classifier",
+    "get_ae_category_classifier",
+    "get_pc_category_classifier",
 ]
