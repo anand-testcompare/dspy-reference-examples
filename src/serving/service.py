@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from collections.abc import Callable
 from functools import lru_cache
 from pathlib import Path
@@ -10,7 +11,7 @@ import dspy
 from pydantic import BaseModel, ConfigDict, Field
 
 from ..common.classifier import ComplaintClassifier
-from ..common.paths import DEFAULT_CLASSIFIER_PATH
+from ..common.paths import DEFAULT_CLASSIFICATION_TYPE, DEFAULT_CLASSIFIER_PATH
 
 
 class ComplaintRequest(BaseModel):
@@ -40,7 +41,14 @@ class ComplaintResponse(BaseModel):
 
 
 def _load_classifier(model_path: Path) -> ComplaintClassifier:
-    classifier = ComplaintClassifier()
+    """Load a classifier, reading the classification type from artifact metadata."""
+    # Read artifact to get classification type
+    with open(model_path) as f:
+        artifact = json.load(f)
+
+    classification_type = artifact.get("metadata", {}).get("classification_type", DEFAULT_CLASSIFICATION_TYPE)
+
+    classifier = ComplaintClassifier(classification_type)
     classifier.load(str(model_path))
     return classifier
 
