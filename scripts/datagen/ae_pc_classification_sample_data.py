@@ -8,7 +8,7 @@ import json
 import random
 from pathlib import Path
 
-DATA_DIR = Path(__file__).resolve().parent.parent / "data/ae-pc-classification"  # TODO confirm this is correct
+DATA_DIR = Path(__file__).resolve().parents[2] / "data/ae-pc-classification"
 TRAIN_FILE = DATA_DIR / "train.json"
 TEST_FILE = DATA_DIR / "test.json"
 
@@ -47,7 +47,7 @@ def add_transcription_artifacts(text: str, intensity: float = 0.3) -> str:
     return " ".join(result)
 
 
-def generate_training_data():
+def _get_hardcoded_training_data():
     """Generate labeled training examples for Ozempic complaints."""
 
     training_data = [
@@ -295,12 +295,91 @@ def generate_training_data():
             "label": "Product Complaint",
             "reasoning": "Reports incorrect component packaging, a dispensing or product configuration error without patient harm.",
         },
+        {
+            "complaint": add_transcription_artifacts(
+                """I've been on the medication for about three weeks now, and I've been vomiting almost every single morning. It's green and bile-like, and my stomach hurts so bad I can't even stand up straight. I've lost ten pounds because I can't keep anything down, not even water. My doctor told me to go to the ER if it didn't stop, and I think I'm at that point now because I'm feeling so dizzy and weak.""",
+                0.3,
+            ),
+            "label": "Adverse Event",
+            "reasoning": "Severe, persistent vomiting and GI distress requiring medical evaluation.",
+        },
+        {
+            "complaint": add_transcription_artifacts(
+                """I was trying to take my first dose this morning, and I followed all the instructions in the manual. I attached the needle and everything, but the pen won't click when I turn the dial. It just slides around silently and doesn't stop at any of the dose numbers. I can't select my dose because the selector mechanism seems completely broken inside. I've tried multiple pens from the box and they all do the same thing.""",
+                0.3,
+            ),
+            "label": "Product Complaint",
+            "reasoning": "Mechanical malfunction of the dose dial mechanism.",
+        },
+        {
+            "complaint": add_transcription_artifacts(
+                """Immediately after I did my injection yesterday, I felt a weird tingling in my lips. Within twenty minutes, my whole face swelled up like a balloon and my eyes were almost swollen shut. I started having trouble breathing and my husband had to drive me to the ER right away. They gave me an EpiPen shot and some steroids. The doctor said it was a severe allergic reaction and I should never take this drug again.""",
+                0.3,
+            ),
+            "label": "Adverse Event",
+            "reasoning": "Serious acute hypersensitivity reaction (angioedema/anaphylaxis) following administration.",
+        },
+        {
+            "complaint": add_transcription_artifacts(
+                """I opened a new box of needles that came with my pen, but the very first needle I pulled out was bent at a 45-degree angle inside the sterile cap. I checked the others in the package, and several more were also crooked or looked like the tips were blunted. It seems like a manufacturing defect with this specific batch of needles because I've never seen this before. I can't use these to inject myself safely.""",
+                0.3,
+            ),
+            "label": "Product Complaint",
+            "reasoning": "Defective product component (needles) preventing safe use.",
+        },
+        {
+            "complaint": add_transcription_artifacts(
+                """I've had severe diarrhea for the last eight days. It's completely liquid and I have to go almost every hour. I can't even leave the house to go to work because I'm afraid of having an accident. I've been drinking tons of water and Pedialyte, but I still feel incredibly dehydrated and my mouth is so dry. My doctor says it's a side effect but I don't think I can keep living like this.""",
+                0.3,
+            ),
+            "label": "Adverse Event",
+            "reasoning": "Prolonged, severe diarrhea causing significant dehydration and lifestyle impact.",
+        },
+        {
+            "complaint": add_transcription_artifacts(
+                """I noticed that the liquid inside my pen looks very cloudy and milky today. Usually, it's crystal clear like water. I've been keeping it in the fridge the whole time, so I don't know why it changed. I haven't used it yet because the instructions say the solution must be clear and colorless. I'm worried that the medication has gone bad or is contaminated with something.""",
+                0.3,
+            ),
+            "label": "Product Complaint",
+            "reasoning": "Appearance defect (turbidity) indicating potential product instability.",
+        },
+        {
+            "complaint": add_transcription_artifacts(
+                """My doctor called me yesterday with my blood results and told me that my kidneys are failing. My creatinine level has jumped from 1.0 to 2.8 in just two months. He thinks it's because I've been so sick to my stomach from the Ozempic and haven't been able to drink enough fluids. He told me to stop the medication immediately and come in for IV hydration. I'm really scared about my long-term kidney health now.""",
+                0.3,
+            ),
+            "label": "Adverse Event",
+            "reasoning": "Acute kidney injury likely secondary to drug-induced GI fluid loss.",
+        },
+        {
+            "complaint": add_transcription_artifacts(
+                """My order arrived today and the shipping box was completely crushed. When I opened the carton, the pen itself was broken in half and the glass cartridge was smashed. There was liquid everywhere inside the packaging. It looks like something very heavy was placed on top of it during shipping. I called the mail-order pharmacy and they're sending a replacement, but it's a huge waste of medicine.""",
+                0.3,
+            ),
+            "label": "Product Complaint",
+            "reasoning": "Physical damage to the product and packaging during distribution.",
+        },
+        {
+            "complaint": add_transcription_artifacts(
+                """I passed out while I was at the mall yesterday. One minute I was walking and the next I was waking up on the floor with paramedics around me. They tested my blood sugar and it was only 40 mg/dL. They said I had a severe hypoglycemic episode. I'm on insulin too, and my doctor never told me to adjust the dose when I started the Ozempic. It was one of the scariest things that's ever happened to me.""",
+                0.3,
+            ),
+            "label": "Adverse Event",
+            "reasoning": "Severe symptomatic hypoglycemia requiring emergency assistance.",
+        },
+        {
+            "complaint": add_transcription_artifacts(
+                """I was inspecting the pen before my injection and I saw a tiny white hair or fiber floating around inside the liquid. It's definitely inside the sealed cartridge because it moves when I tilt the pen. This is supposed to be a sterile injectable, and having hair in it is absolutely unacceptable. I'm taking it back to the pharmacy because there's no way I'm injecting that into my body.""",
+                0.3,
+            ),
+            "label": "Product Complaint",
+            "reasoning": "Contamination with foreign biological matter inside the product container.",
+        },
     ]
-
     return training_data
 
 
-def generate_test_data():
+def _get_hardcoded_test_data():
     """Generate test examples for evaluation."""
 
     test_data = [
@@ -510,6 +589,61 @@ def generate_test_data():
     ]
 
     return test_data
+
+
+def load_external_data(split: str) -> list[dict]:
+    """Load and adapt data from AE and PC category classification datasets."""
+    data = []
+    
+    # Load Adverse Event data
+    ae_dir = DATA_DIR.parent / "ae-category-classification"
+    ae_file = ae_dir / f"{split}.json"
+    if ae_file.exists():
+        try:
+            with ae_file.open("r", encoding="utf-8") as f:
+                ae_items = json.load(f)
+                for item in ae_items:
+                    data.append({
+                        "complaint": item.get("narrative", item.get("narrive", "")),
+                        "label": "Adverse Event",
+                        "reasoning": f"Category: {item.get('category', 'Unknown')}. {item.get('reasoning', '')}"
+                    })
+        except Exception as e:
+            print(f"Warning: Could not load AE data from {ae_file}: {e}")
+            
+    # Load Product Complaint data
+    pc_dir = DATA_DIR.parent / "pc-category-classification"
+    pc_file = pc_dir / f"{split}.json"
+    if pc_file.exists():
+        try:
+            with pc_file.open("r", encoding="utf-8") as f:
+                pc_items = json.load(f)
+                for item in pc_items:
+                    data.append({
+                        "complaint": item.get("narrative", item.get("narrive", "")),
+                        "label": "Product Complaint",
+                        "reasoning": f"Category: {item.get('category', 'Unknown')}. {item.get('reasoning', '')}"
+                    })
+        except Exception as e:
+            print(f"Warning: Could not load PC data from {pc_file}: {e}")
+            
+    return data
+
+
+def generate_training_data():
+    """Generate combined training data."""
+    data = _get_hardcoded_training_data()
+    data.extend(load_external_data("train"))
+    random.shuffle(data)
+    return data
+
+
+def generate_test_data():
+    """Generate combined test data."""
+    data = _get_hardcoded_test_data()
+    data.extend(load_external_data("test"))
+    random.shuffle(data)
+    return data
 
 
 def write_datasets(train_path: Path = TRAIN_FILE, test_path: Path = TEST_FILE) -> None:
