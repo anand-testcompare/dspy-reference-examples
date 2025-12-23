@@ -6,7 +6,7 @@ import argparse
 import json
 
 import dspy
-from dspy.teleprompt import BootstrapFewShotWithRandomSearch
+from dspy.teleprompt import MIPROv2
 
 from ..common.classifier import (
     CLASSIFICATION_CONFIGS,
@@ -54,18 +54,20 @@ def run_pipeline(classification_type: str = DEFAULT_CLASSIFICATION_TYPE) -> None
     baseline_accuracy = evaluate_model(baseline_classifier, testset, "Test Set")
 
     print("\n" + "🔄 OPTIMIZING WITH DSPy...")
-    print("Using BootstrapFewShotWithRandomSearch optimizer")
+    print("Using MIPROv2 optimizer")
     print("This may take a few minutes...\n")
 
-    optimizer = BootstrapFewShotWithRandomSearch(
+    optimizer = MIPROv2(
         metric=classification_metric,
-        max_bootstrapped_demos=3,
-        num_candidate_programs=8,
+        auto="medium",
+        verbose=True,
     )
 
     optimized_classifier = optimizer.compile(
         ComplaintClassifier(classification_type),
         trainset=trainset,
+        max_bootstrapped_demos=3,
+        max_labeled_demos=4,
     )
 
     print("✓ Optimization complete!\n")
