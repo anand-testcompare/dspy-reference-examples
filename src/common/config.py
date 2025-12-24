@@ -8,8 +8,10 @@ import dspy
 from pydantic import BaseModel, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-DEFAULT_MODEL = "openai/gpt-oss-120b"
+DEFAULT_MODEL = "nvidia/nemotron-3-nano-30b-a3b:free"
+DEFAULT_LOCAL_MODEL = "Nemotron-3-Nano-30B-A3B-UD-Q3_K_XL"
 DEFAULT_OPENROUTER_BASE = "https://openrouter.ai/api/v1"
+DEFAULT_LOCAL_BASE = "http://localhost:8080/v1"
 
 
 class EnvironmentSettings(BaseSettings):
@@ -21,12 +23,10 @@ class EnvironmentSettings(BaseSettings):
         extra="allow",
     )
 
-    model_name: str = Field(DEFAULT_MODEL, alias="DSPY_MODEL_NAME")
-    dspy_api_key: str | None = Field(None, alias="DSPY_API_KEY")
+    provider: str = Field("openrouter", alias="DSPY_PROVIDER")
+    model_name: str | None = Field(None, alias="DSPY_MODEL_NAME")
     openrouter_api_key: str | None = Field(None, alias="OPENROUTER_API_KEY")
-    openai_api_key: str | None = Field(None, alias="OPENAI_API_KEY")
-    dspy_api_base: str | None = Field(None, alias="DSPY_API_BASE")
-    openrouter_api_base: str | None = Field(None, alias="OPENROUTER_API_BASE")
+    local_base: str | None = Field(None, alias="DSPY_LOCAL_BASE")
     raw_http_headers: str | None = Field(None, alias="DSPY_HTTP_HEADERS")
     openrouter_http_referer: str | None = Field(None, alias="OPENROUTER_HTTP_REFERER")
     openrouter_app_title: str | None = Field(None, alias="OPENROUTER_APP_TITLE")
@@ -44,6 +44,10 @@ class LLMConfig(BaseModel):
     def is_openrouter(self) -> bool:
         base = (self.api_base or "").lower()
         return "openrouter" in base
+
+    @property
+    def is_local(self) -> bool:
+        return self.api_key == "dummy" or self.api_key is None
 
 
 def _load_extra_headers(env: EnvironmentSettings) -> dict[str, str]:
@@ -70,19 +74,33 @@ def load_llm_config() -> LLMConfig:
     """Load LM configuration from environment variables."""
 
     env = EnvironmentSettings()
+    provider = env.provider.lower()
 
-    api_key = env.dspy_api_key or env.openrouter_api_key or env.openai_api_key
-    if not api_key:
-        raise RuntimeError("No API key found. Set OPENROUTER_API_KEY, OPENAI_API_KEY, or DSPY_API_KEY.")
+    if provider == "local":
+        model_name = env.model_name or DEFAULT_LOCAL_MODEL
+        # LiteLLM requires openai/ prefix for OpenAI-compatible local servers
+        if not model_name.startswith("openai/"):
+            model_name = f"openai/{model_name}"
+        return LLMConfig(
+            model=model_name,
+            api_key="dummy",  # LiteLLM requires a non-None api_key for openai provider
+            api_base=env.local_base or DEFAULT_LOCAL_BASE,
+            headers={},
+        )
 
-    api_base = env.dspy_api_base or env.openrouter_api_base
-    if not api_base and env.openrouter_api_key:
-        api_base = DEFAULT_OPENROUTER_BASE
+    # OpenRouter provider (default)
+    if not env.openrouter_api_key:
+        raise RuntimeError("No API key found. Set OPENROUTER_API_KEY or use DSPY_PROVIDER=local.")
+
+    model_name = env.model_name or DEFAULT_MODEL
+    # Ensure model has openrouter/ prefix for litellm provider routing
+    if not model_name.startswith("openrouter/"):
+        model_name = f"openrouter/{model_name}"
 
     return LLMConfig(
-        model=env.model_name or DEFAULT_MODEL,
-        api_key=api_key,
-        api_base=api_base,
+        model=model_name,
+        api_key=env.openrouter_api_key,
+        api_base=DEFAULT_OPENROUTER_BASE,
         headers=_load_extra_headers(env),
     )
 
@@ -96,6 +114,7 @@ def configure_lm() -> dspy.LM:
         api_key=cfg.api_key,
         api_base=cfg.api_base,
         headers=cfg.headers or None,
+        max_tokens=8000,
     )
     dspy.configure(lm=lm)
     return lm

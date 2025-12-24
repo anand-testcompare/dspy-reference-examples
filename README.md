@@ -262,6 +262,34 @@ commands.
 
 ---
 
+## Local LLM Server (llama.cpp)
+
+To run a local LLM server using llama.cpp:
+
+```bash
+cd llama.cpp
+
+# Build llama.cpp
+cmake -B build
+cmake --build build --config Release
+
+# Download the model from Hugging Face (save to models directory)
+# Visit the model page on HF for the curl command, e.g.:
+# curl -L -o models/Nemotron-3-Nano-30B-A3B-UD-Q3_K_XL.gguf <HF_URL>
+
+# Start the server
+./build/bin/llama-server -m models/Nemotron-3-Nano-30B-A3B-UD-Q3_K_XL.gguf -c 16384 -ngl 99 --host 0.0.0.0 --port 8080
+```
+
+Then configure DSPy to use your local server by setting:
+
+```bash
+export DSPY_API_BASE=http://localhost:8080/v1
+export DSPY_MODEL_NAME=local-model
+```
+
+---
+
 ## Notes & Next Steps
 
 - Replace `data/*-classification/*.json` with real labeled datasets or update `src/common/data_utils.py` to read from
