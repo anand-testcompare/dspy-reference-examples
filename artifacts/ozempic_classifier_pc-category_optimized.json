@@ -2,26 +2,9 @@
   "classify.predict": {
     "traces": [],
     "train": [],
-    "demos": [
-      {
-        "complaint": "This was honestly pretty scary when it happened. I was doing my usual weekly injection this morning, everything was set up normally, dose dialed, needle attached. I started the injection, pressed the button down, and suddenly I heard this cracking sound - kind of like a snap. Immediately felt the needle hub area get loose or wobbly. When I looked down, the plastic hub where the needle attaches to the pen had actually broken or separated. I carefully tried to pull the pen away from my skin like you're supposed to, but the needle itself stayed stuck in my skin while the pen pulled away. The needle had detached from the hub and was just sitting there in my injection site. I had to very carefully pull just the needle out manually, which I was not prepared to do. Thankfully it came out okay and didn't break under the skin or anything, but my hands were shaking afterward. Called the pharmacy right away and they had me come in to document everything and check the injection site. The pen clearly has some kind of structural failure at the needle attachment point. This could have been much worse if the needle had broken off completely under the skin. The manufacturer needs to know about this defect because it's a serious safety issue.",
-        "classification": "Device malfunction"
-      },
-      {
-        "complaint": "The solution has crystals in it that look like shards of glass. They are settling at the bottom. I've never seen this before. I'm afraid it will clog the needle or hurt me.",
-        "classification": "Stability/Appearance defect"
-      },
-      {
-        "complaint": "The pen cap was glued on. I had to use pliers to get it off. It left glue residue on the needle attachment. I can't use it safely.",
-        "classification": "Packaging defect"
-      },
-      {
-        "complaint": "The liquid is cloudy and milky. There are white clumps floating in it. It's supposed to be clear and colorless. I shook it but it didn't dissolve. It looks like the protein has precipitated out.",
-        "classification": "Stability/Appearance defect"
-      }
-    ],
+    "demos": [],
     "signature": {
-      "instructions": "You are an expert classification assistant.  \nGiven a free\u2011text complaint about an Ozempic injection pen, you must:\n\n1. Read the complaint carefully.  \n2. Produce a **Reasoning** section that explains, step by step, how you interpret the text, highlighting any cues that point to the underlying defect type.  \n3. Pick one of the following exact class labels.  \n   - **Stability/Appearance defect**  \n   - **Device malfunction**  \n   - **Storage/Temperature excursion**  \n   - **Labeling error**  \n   - **Contamination/Foreign matter**  \n   - **Packaging defect**  \n   - **Counterfeit/Unauthorized source**  \n   - **Potency/Assay defect**  \n   - **Distribution/Expiry**  \n   (Output the chosen label after a colon: `Classification: <label>`)  \n4. Write a concise **Justification** (one sentence) that ties the reasoning to the chosen label.  \n\nFormat your answer exactly like this, with the three sections in order:\n\n```\nReasoning: <step\u2011by\u2011step explanation>  \nClassification: <chosen label>  \nJustification: <brief rationale>\n```\n\nEnsure that each field is clearly labeled and that the classification matches only the labels above.  \nDo not add any extra commentary or tags.  \n---",
+      "instructions": "Classify product complaints into specific categories.",
       "fields": [
         {
           "prefix": "Complaint:",
@@ -49,7 +32,7 @@
       "dspy": "3.0.3",
       "cloudpickle": "3.1"
     },
-    "model": "openrouter/@preset/gpt-oss-20b",
+    "model": "openai/Nemotron-3-Nano-30B-A3B-UD-Q3_K_XL.gguf",
     "classification_type": "pc-category",
     "classification_config": {
       "description": "Classify product complaints into specific categories.",

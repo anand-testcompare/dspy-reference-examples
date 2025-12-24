@@ -47,7 +47,7 @@ class LLMConfig(BaseModel):
 
     @property
     def is_local(self) -> bool:
-        return self.api_key is None
+        return self.api_key == "dummy" or self.api_key is None
 
 
 def _load_extra_headers(env: EnvironmentSettings) -> dict[str, str]:
@@ -77,9 +77,13 @@ def load_llm_config() -> LLMConfig:
     provider = env.provider.lower()
 
     if provider == "local":
+        model_name = env.model_name or DEFAULT_LOCAL_MODEL
+        # LiteLLM requires openai/ prefix for OpenAI-compatible local servers
+        if not model_name.startswith("openai/"):
+            model_name = f"openai/{model_name}"
         return LLMConfig(
-            model=env.model_name or DEFAULT_LOCAL_MODEL,
-            api_key=None,
+            model=model_name,
+            api_key="dummy",  # LiteLLM requires a non-None api_key for openai provider
             api_base=env.local_base or DEFAULT_LOCAL_BASE,
             headers={},
         )
