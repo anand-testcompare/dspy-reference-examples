@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from collections.abc import Callable
 from functools import lru_cache
 from pathlib import Path
@@ -72,9 +73,35 @@ class ComplaintResponse(BaseModel):
 
 
 def _load_classifier(model_path: Path, classification_type: str) -> ComplaintClassifier:
-    """Load a classifier for a specific classification type."""
+    """Load a classifier for a specific classification type and update metadata with current model."""
     classifier = ComplaintClassifier(classification_type)
     classifier.load(str(model_path))
+    
+    # Update artifact metadata with current model if different from saved model
+    current_model = dspy.settings.lm.model if dspy.settings.lm else None
+    if current_model:
+        try:
+            # Read the current artifact
+            with open(model_path) as f:
+                artifact_data = json.load(f)
+            
+            # Check if metadata exists and model is different
+            saved_model = artifact_data.get("metadata", {}).get("model")
+            if saved_model != current_model:
+                # Ensure metadata section exists
+                if "metadata" not in artifact_data:
+                    artifact_data["metadata"] = {}
+                
+                # Update the model in metadata
+                artifact_data["metadata"]["model"] = current_model
+                
+                # Save the updated artifact
+                with open(model_path, "w") as f:
+                    json.dump(artifact_data, f, indent=2)
+        except (OSError, json.JSONDecodeError):
+            # If we can't read/write the file, just proceed with the loaded classifier
+            pass
+    
     return classifier
 
 
