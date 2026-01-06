@@ -7,22 +7,27 @@ from .classifier import (
     create_classification_signature,
     evaluate_model,
 )
-from .config import LLMConfig, configure_lm, load_llm_config
+from .config import (
+    DEFAULT_CACHE_DIR,
+    LLMConfig,
+    configure_lm,
+    ensure_dspy_cache_dir,
+    load_llm_config,
+)
 from .data_utils import prepare_datasets
+from .logging import configure_logging
 from .paths import (
     ARTIFACTS_DIR,
     CLASSIFICATION_TYPES,
     DATA_DIR,
     DEFAULT_CLASSIFICATION_TYPE,
-    DEFAULT_CLASSIFIER_PATH,
     ROOT_DIR,
-    TEST_DATA_PATH,
-    TRAIN_DATA_PATH,
     get_classification_data_dir,
     get_classifier_artifact_path,
     get_test_data_path,
     get_train_data_path,
 )
+from .types import CLASSIFICATION_TYPE_VALUES, ClassificationType
 
 __all__ = [
     "CLASSIFICATION_CONFIGS",
@@ -31,17 +36,19 @@ __all__ = [
     "classification_metric",
     "evaluate_model",
     "configure_lm",
+    "ensure_dspy_cache_dir",
+    "DEFAULT_CACHE_DIR",
     "LLMConfig",
     "load_llm_config",
+    "configure_logging",
     "prepare_datasets",
     "ROOT_DIR",
     "DATA_DIR",
     "ARTIFACTS_DIR",
     "CLASSIFICATION_TYPES",
     "DEFAULT_CLASSIFICATION_TYPE",
-    "TRAIN_DATA_PATH",
-    "TEST_DATA_PATH",
-    "DEFAULT_CLASSIFIER_PATH",
+    "CLASSIFICATION_TYPE_VALUES",
+    "ClassificationType",
     "get_classification_data_dir",
     "get_train_data_path",
     "get_test_data_path",

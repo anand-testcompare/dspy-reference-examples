@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import json
+import os
+from pathlib import Path
 
 import dspy
 from pydantic import BaseModel, Field
@@ -12,6 +14,7 @@ DEFAULT_MODEL = "nvidia/nemotron-3-nano-30b-a3b:free"
 DEFAULT_LOCAL_MODEL = "Nemotron-3-Nano-30B-A3B-UD-Q3_K_XL"
 DEFAULT_OPENROUTER_BASE = "https://openrouter.ai/api/v1"
 DEFAULT_LOCAL_BASE = "http://localhost:8080/v1"
+DEFAULT_CACHE_DIR = Path("data/.dspy_cache")
 
 
 class EnvironmentSettings(BaseSettings):
@@ -105,9 +108,18 @@ def load_llm_config() -> LLMConfig:
     )
 
 
+def ensure_dspy_cache_dir(cache_dir: Path | None = None) -> Path:
+    """Ensure DSPy cache directory exists and is configured."""
+    path = cache_dir or DEFAULT_CACHE_DIR
+    path.mkdir(parents=True, exist_ok=True)
+    os.environ.setdefault("DSPY_CACHEDIR", str(path))
+    return path
+
+
 def configure_lm() -> dspy.LM:
     """Configure DSPy with the loaded LM settings and return the LM instance."""
 
+    ensure_dspy_cache_dir()
     cfg = load_llm_config()
     lm = dspy.LM(
         cfg.model,
@@ -120,4 +132,11 @@ def configure_lm() -> dspy.LM:
     return lm
 
 
-__all__ = ["LLMConfig", "configure_lm", "load_llm_config", "DEFAULT_MODEL"]
+__all__ = [
+    "DEFAULT_MODEL",
+    "DEFAULT_CACHE_DIR",
+    "LLMConfig",
+    "configure_lm",
+    "ensure_dspy_cache_dir",
+    "load_llm_config",
+]

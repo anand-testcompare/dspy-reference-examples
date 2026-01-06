@@ -5,14 +5,18 @@ description = "DSPy optimization reference for Ozempic complaint classification"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-  "dspy-ai>=2.5.0",
-  "openai>=1.0.0",
-  "pydantic>=2.6.0",
-  "pydantic-settings>=2.4.0",
-  "fastapi>=0.115.0",
-  "uvicorn>=0.30.0",
-  "pytest>=8.3.0",
-  "ruff>=0.6.0",
+  "dspy-ai>=3.1.0",
+  "openai>=2.14.0",
+  "pydantic>=2.12.5",
+  "pydantic-settings>=2.12.0",
+  "fastapi>=0.128.0",
+  "uvicorn>=0.40.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=9.0.2",
+  "ruff>=0.14.10",
 ]
 
 [build-system]
@@ -20,7 +24,7 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [tool.pytest.ini_options]
-pythonpath = ["src"]
+pythonpath = ["."]
 markers = [
   "integration: tests that hit real LLMs or external services",
 ]
@@ -29,7 +33,7 @@ log_cli_level = "INFO"
 
 [tool.ruff]
 line-length = 120
-target-version = "py312"
+target-version = "py313"
 
 [tool.ruff.format]
 quote-style = "double"

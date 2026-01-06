@@ -8,6 +8,7 @@ from .service import (
     PCCategoryRequest,
     get_ae_category_classifier,
     get_ae_pc_classifier,
+    get_classification_function,
     get_pc_category_classifier,
 )
 
@@ -20,4 +21,5 @@ __all__ = [
     "get_ae_pc_classifier",
     "get_ae_category_classifier",
     "get_pc_category_classifier",
+    "get_classification_function",
 ]

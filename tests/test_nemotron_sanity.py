@@ -1,27 +1,63 @@
 """Quick sanity test for nemotron model invocation via local llama.cpp server."""
 
+from __future__ import annotations
+
+import socket
+from urllib.parse import urlparse
+
 import dspy
+import pytest
 import requests
 
 from src.common.config import configure_lm, load_llm_config
 
 
-def test_config_loads():
-    """Verify config loads correctly for local provider."""
-    cfg = load_llm_config()
-    print(f"\n[Config] Provider: {'local' if cfg.is_local else 'openrouter'}")
-    print(f"[Config] Model: {cfg.model}")
-    print(f"[Config] API Base: {cfg.api_base}")
-    assert cfg.is_local, "Expected local provider. Set DSPY_PROVIDER=local in .env"
-    assert "Nemotron" in cfg.model or "nemotron" in cfg.model.lower(), f"Expected Nemotron model, got: {cfg.model}"
+def _skip_if_unreachable(api_base: str | None) -> None:
+    if not api_base:
+        pytest.skip("No API base configured for local LLM.")
+    parsed = urlparse(api_base)
+    host = parsed.hostname or "localhost"
+    port = parsed.port or (443 if parsed.scheme == "https" else 80)
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        sock.settimeout(1.0)
+        try:
+            sock.connect((host, port))
+        except OSError:
+            pytest.skip(f"Local LLM server not reachable at {host}:{port}.")
+
+
+@pytest.fixture(scope="session")
+def cfg():
+    try:
+        cfg = load_llm_config()
+    except RuntimeError as exc:
+        pytest.skip(str(exc))
     return cfg
 
 
-def test_raw_api_call(cfg):
+@pytest.fixture(scope="session")
+def local_cfg(cfg):
+    if not cfg.is_local:
+        pytest.skip("Expected local provider. Set DSPY_PROVIDER=local in .env.")
+    _skip_if_unreachable(cfg.api_base)
+    return cfg
+
+
+def test_config_loads(cfg):
+    """Verify config loads correctly for local provider."""
+    print(f"\n[Config] Provider: {'local' if cfg.is_local else 'openrouter'}")
+    print(f"[Config] Model: {cfg.model}")
+    print(f"[Config] API Base: {cfg.api_base}")
+    if not cfg.is_local:
+        pytest.skip("Expected local provider. Set DSPY_PROVIDER=local in .env.")
+    assert "nemotron" in cfg.model.lower(), f"Expected Nemotron model, got: {cfg.model}"
+
+
+def test_raw_api_call(local_cfg):
     """Test raw HTTP call to llama.cpp /v1/chat/completions endpoint."""
-    url = f"{cfg.api_base}/chat/completions"
+    url = f"{local_cfg.api_base}/chat/completions"
     payload = {
-        "model": cfg.model,
+        "model": local_cfg.model,
         "messages": [{"role": "user", "content": "What is 2 + 2? Answer with just the number."}],
         "max_tokens": 50,
         "temperature": 0.0,
@@ -29,9 +65,12 @@ def test_raw_api_call(cfg):
     print(f"\n[Raw API] POST {url}")
     print(f"[Raw API] Payload: {payload}")
 
-    resp = requests.post(url, json=payload, timeout=60)
-    resp.raise_for_status()
-    data = resp.json()
+    try:
+        resp = requests.post(url, json=payload, timeout=60)
+        resp.raise_for_status()
+        data = resp.json()
+    except requests.RequestException as exc:
+        pytest.skip(f"Local LLM request failed: {exc}")
 
     print(f"[Raw API] Status: {resp.status_code}")
     print(f"[Raw API] Response: {data}")
@@ -42,7 +81,7 @@ def test_raw_api_call(cfg):
     return data
 
 
-def test_nemotron_basic_completion():
+def test_nemotron_basic_completion(local_cfg):
     """Sanity test: invoke nemotron with a simple prompt."""
     lm = configure_lm()
     print(f"\n[LM] Configured: {lm}")
@@ -55,7 +94,7 @@ def test_nemotron_basic_completion():
     assert "4" in str(response), f"Expected '4' in response, got: {response}"
 
 
-def test_nemotron_dspy_predict():
+def test_nemotron_dspy_predict(local_cfg):
     """Sanity test: use DSPy Predict module."""
     lm = configure_lm()
 

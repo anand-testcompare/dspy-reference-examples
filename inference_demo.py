@@ -5,8 +5,10 @@ from __future__ import annotations
 import time
 
 from src.common.config import configure_lm
+from src.common.logging import configure_logging
 from src.serving.service import ComplaintRequest, get_classification_function
 
+configure_logging()
 configure_lm()
 
 try:

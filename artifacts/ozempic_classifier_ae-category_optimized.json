@@ -5,32 +5,29 @@
     "demos": [
       {
         "augmented": true,
-        "complaint": "Patient underwent laparoscopic cholecystectomy under general anesthesia. During induction, patient experienced regurgitation of gastric contents with subsequent aspiration despite documented 10-hour fast. Immediate endotracheal intubation performed with visualization of gastric material in oropharynx. Bronchoscopy performed showing aspirated material in right mainstem bronchus, which was suctioned. Post-operative chest x-ray demonstrated right lower lobe infiltrate consistent with aspiration. Patient transferred to ICU for close monitoring. Medication reconciliation revealed ongoing semaglutide use, last dose 3 days prior to surgery. Anesthesiology documentation notes GLP-1 receptor agonists should ideally be held 1-2 weeks before elective procedures due to delayed gastric emptying. Patient developed aspiration pneumonitis requiring antibiotics and extended hospital stay.",
-        "reasoning": "The patient experienced regurgitation and aspiration of gastric contents during induction of general anesthesia, despite a documented 10\u2011hour fast. The presence of semaglutide (a GLP\u20111 receptor agonist) is known to delay gastric emptying, increasing the volume of gastric contents at the time of anesthesia and thereby elevating the risk of aspiration. The clinical course\u2014aspiration pneumonitis, infiltrate on chest X\u2011ray, ICU admission, and prolonged hospitalization\u2014directly reflects a peri\u2011procedural aspiration event precipitated by medication\u2011related delayed gastric emptying.",
-        "classification": "Peri-procedural aspiration risk",
-        "justification": "The adverse event is an aspiration that occurred during a surgical procedure, and the risk was heightened by the patient\u2019s use of semaglutide, which delays gastric emptying. This matches the \u201cPeri\u2011procedural aspiration risk\u201d category."
+        "complaint": "I have a red, itchy rash at the injection site. It spreads and burns. It lasts for days. I think I'm allergic to the injection.",
+        "reasoning": "The complaint describes a localized skin reaction occurring at the semaglutide injection site, characterized by redness, itching, spreading erythema, burning sensation, and persistence for several days. These features are typical of an injection\u2011site reaction rather than a systemic hypersensitivity event.",
+        "classification": "Injection-site reactions",
+        "justification": "The symptoms are confined to the injection area and match the clinical picture of an injection\u2011site reaction (red, itchy, burning rash that spreads locally and lasts days)."
       },
       {
         "augmented": true,
-        "complaint": "I've been having this pain like right here under my ribs on the right side, especially after I eat anything fatty. Started maybe two months ago? My doctor ordered an ultrasound and they found gallstones. The weird thing is I've lost about 30 pounds since I started on this medication back in like October, so I guess that's good, but now I have gallstones? Doctor said the rapid weight loss might be related. We're trying to figure out what to do next.",
-        "reasoning": "The patient reports right upper quadrant pain after fatty meals, ultrasound-confirmed gallstones, and a history of rapid weight loss associated with medication use. These symptoms and findings are characteristic of gallbladder disease, specifically gallstone-related hepatobiliary pathology.",
-        "classification": "Hepatobiliary (gallbladder) disease",
-        "justification": "The complaint describes gallstones and related right-sided abdominal pain, which falls squarely under hepatobiliary (gallbladder) disease."
+        "complaint": "My kidneys are injured from dehydration. My creatinine is high. I was sick with diarrhea for days. The doctor stopped the drug to protect my kidneys.",
+        "reasoning": "The patient describes acute kidney injury manifested by elevated creatinine secondary to volume depletion (dehydration) after diarrhea, occurring while on semaglutide (Ozempic). This aligns with renal adverse events.",
+        "classification": "Renal events (Acute kidney injury)",
+        "justification": "Dehydration\u2011induced rise in creatinine in a patient on Ozempic reflects an acute kidney injury, fitting the renal events category."
       },
       {
-        "augmented": true,
-        "complaint": "I have gallstones and need to have my gallbladder removed. I have pain in my right side after eating. The doctor says the rapid weight loss caused the stones. I'm scheduled for surgery next week.",
-        "reasoning": "The patient reports gallstones, right-sided abdominal pain after eating, and an upcoming gallbladder removal surgery. These symptoms and the planned surgical intervention are characteristic of a hepatobiliary disorder involving the gallbladder.",
-        "classification": "Hepatobiliary (gallbladder) disease",
-        "justification": "Gallstones and related pain are classic manifestations of gallbladder disease, fitting the hepatobiliary category."
+        "complaint": "My vision is blurry. I have bleeding in my eye. It's retinopathy.",
+        "classification": "Eye disorders (Diabetic retinopathy complications)"
       },
       {
-        "complaint": "My heart is pounding in my chest. My pulse is 110. I feel short of breath. The doctor says it's tachycardia from the drug. I need to stop taking it.",
-        "classification": "Cardiovascular signs"
+        "complaint": "My retina specialist is concerned about the new blood vessels growing in my eye. He says I have proliferative retinopathy now. I've had some episodes where my vision goes dark for a few minutes. He attributes the rapid progression to the sudden drop in my A1C levels since starting Ozempic. I'm scheduled for laser photocoagulation surgery next week to save my sight.",
+        "classification": "Eye disorders (Diabetic retinopathy complications)"
       }
     ],
     "signature": {
-      "instructions": "Given a free\u2011text patient complaint describing an adverse event while on a medication such as Ozempic, please:\n1. **Reason**: Write a brief step\u2011by\u2011step reasoning that interprets the symptoms and context, explaining how they indicate a drug\u2011related adverse event.\n2. **Classify**: Select the single most appropriate category from the closed set of adverse\u2011event labels (e.g., Gastrointestinal disorders, Pancreatitis, Hepatobiliary\u2026).\n3. **Justify**: Provide a concise justification that links the reasoning to the chosen classification.\n\nRespond **exactly** in this format (no additional text):\n\n```\nReasoning: <your reasoning>\nClassification: <selected category>\nJustification: <brief justification>\n```",
+      "instructions": "Classify adverse events into specific categories.",
       "fields": [
         {
           "prefix": "Complaint:",
@@ -54,11 +51,11 @@
   },
   "metadata": {
     "dependency_versions": {
-      "python": "3.13",
-      "dspy": "3.0.3",
+      "python": "3.14",
+      "dspy": "3.1.0",
       "cloudpickle": "3.1"
     },
-    "model": "openrouter/openai/gpt-oss-20b",
+    "model": "openrouter/openai/gpt-oss-120b",
     "classification_type": "ae-category",
     "classification_config": {
       "description": "Classify adverse events into specific categories.",
