@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import dspy
 
+from .types import ClassificationType
+
 # Classification type configurations
 CLASSIFICATION_CONFIGS = {
     "ae-pc": {
@@ -55,7 +57,7 @@ CLASSIFICATION_CONFIGS = {
 }
 
 
-def create_classification_signature(classification_type: str = "ae-pc") -> type[dspy.Signature]:
+def create_classification_signature(classification_type: ClassificationType = "ae-pc") -> type[dspy.Signature]:
     """Create a classification signature dynamically based on the classification type."""
     config = CLASSIFICATION_CONFIGS.get(classification_type)
     if not config:
@@ -76,7 +78,7 @@ def create_classification_signature(classification_type: str = "ae-pc") -> type[
 class ComplaintClassifier(dspy.Module):
     """DSPy module wrapping the complaint classification prompt."""
 
-    def __init__(self, classification_type: str = "ae-pc"):
+    def __init__(self, classification_type: ClassificationType = "ae-pc"):
         super().__init__()
         self.classification_type = classification_type
         signature = create_classification_signature(classification_type)

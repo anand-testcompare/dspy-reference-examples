@@ -16,15 +16,17 @@ from ..common.classifier import (
 )
 from ..common.config import configure_lm
 from ..common.data_utils import prepare_datasets
+from ..common.logging import configure_logging
 from ..common.paths import (
     ARTIFACTS_DIR,
     CLASSIFICATION_TYPES,
     DEFAULT_CLASSIFICATION_TYPE,
     get_classifier_artifact_path,
 )
+from ..common.types import ClassificationType
 
 
-def run_pipeline(classification_type: str = DEFAULT_CLASSIFICATION_TYPE) -> None:
+def run_pipeline(classification_type: ClassificationType = DEFAULT_CLASSIFICATION_TYPE) -> None:
     """Train, optimize, and evaluate the classifier, then persist the artifact.
 
     Args:
@@ -115,6 +117,7 @@ def run_pipeline(classification_type: str = DEFAULT_CLASSIFICATION_TYPE) -> None
 
 
 def main() -> None:
+    configure_logging()
     parser = argparse.ArgumentParser(description="Train and optimize the Ozempic complaint classifier")
     parser.add_argument(
         "--classification-type",

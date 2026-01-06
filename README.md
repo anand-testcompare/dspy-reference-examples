@@ -1,5 +1,12 @@
 # DSPy Reference Examples
 
+![Python](https://img.shields.io/badge/Python-3.13+-3776AB?logo=python&logoColor=white)
+![DSPy](https://img.shields.io/badge/DSPy-3.1.0-1F2937)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.128.0-009688?logo=fastapi&logoColor=white)
+![Pydantic](https://img.shields.io/badge/Pydantic-2.12.5-E92063?logo=pydantic&logoColor=white)
+![Ruff](https://img.shields.io/badge/Ruff-0.14.10-FCC21B?logo=ruff&logoColor=000000)
+![uv](https://img.shields.io/badge/uv-0.9.18-0E6F5A)
+
 Real-world DSPy workflows for pharma/medtech teams. This project provides a flexible multi-classification system for
 Ozempic-related text analysis. Currently supports three classification tasks:
 
@@ -18,10 +25,10 @@ The framework shows how to:
 
 ## Requirements
 
-- Python 3.12+
+- Python 3.13+
 - [`uv`](https://docs.astral.sh/uv/) for env + dependency management (no `pip`/`poetry`)
 - OpenAI-compatible API key
-  - Default provider: [OpenRouter](https://openrouter.ai/) using `openai/gpt-oss-120b`
+  - Default provider: [OpenRouter](https://openrouter.ai/) using `nvidia/nemotron-3-nano-30b-a3b:free`
   - Override via environment variables without touching code
 
 ### Environment variables
@@ -30,10 +37,14 @@ The framework shows how to:
 | ------------------------------------------------- | -------------------------------- | ------------------------------ |
 | `OPENROUTER_API_KEY`                              | Primary key for OpenRouter       | —                              |
 | `OPENAI_API_KEY` / `DSPY_API_KEY`                 | Override for OpenAI/custom key   | —                              |
-| `DSPY_MODEL_NAME`                                 | Model ID                         | `openai/gpt-oss-120b`          |
-| `DSPY_API_BASE`                                   | Base URL for model provider      | `https://openrouter.ai/api/v1` |
+| `DSPY_MODEL_NAME`                                 | Model ID                         | `nvidia/nemotron-3-nano-30b-a3b:free` |
+| `DSPY_LOCAL_BASE`                                 | Base URL for local provider      | `http://localhost:8080/v1`     |
 | `DSPY_HTTP_HEADERS`                               | JSON blob for extra HTTP headers | `{}`                           |
 | `OPENROUTER_HTTP_REFERER`, `OPENROUTER_APP_TITLE` | OpenRouter analytics headers     | —                              |
+| `DSPY_LOG_LEVEL`                                  | Log verbosity                    | `INFO`                         |
+| `DSPY_LOG_FORMAT`                                 | Log format (`json` or `text`)    | `json`                         |
+| `DSPY_RUN_ID`                                     | Correlation run id               | auto-generated                 |
+| `DSPY_ARTIFACT_AUTO_UPDATE`                       | Auto-update artifact model metadata on load | `false`             |
 
 Copy `.env.example` and fill in whichever keys you need:
 
@@ -46,7 +57,7 @@ cp .env.example .env
 ## Project Setup
 
 ```bash
-uv sync                     # creates/updates .venv from pyproject + uv.lock
+uv sync --extra dev         # creates/updates .venv (includes dev tools like pytest/ruff)
 source .venv/bin/activate
 
 # Generate training data for all classification types
@@ -284,7 +295,7 @@ cmake --build build --config Release
 Then configure DSPy to use your local server by setting:
 
 ```bash
-export DSPY_API_BASE=http://localhost:8080/v1
+export DSPY_LOCAL_BASE=http://localhost:8080/v1
 export DSPY_MODEL_NAME=local-model
 ```
 

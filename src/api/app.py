@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 from contextlib import asynccontextmanager
+from uuid import uuid4
 
 from fastapi import FastAPI, HTTPException, status
 
 from ..common.config import configure_lm
+from ..common.logging import configure_logging, reset_request_id, set_request_id
 from ..serving.service import (
     AECategoryRequest,
     AEPCRequest,
@@ -16,6 +18,9 @@ from ..serving.service import (
     get_ae_pc_classifier,
     get_pc_category_classifier,
 )
+
+
+configure_logging()
 
 
 @asynccontextmanager
@@ -62,6 +67,18 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc",
 )
+
+
+@app.middleware("http")
+async def attach_request_id(request, call_next):
+    request_id = request.headers.get("X-Request-ID") or uuid4().hex
+    token = set_request_id(request_id)
+    try:
+        response = await call_next(request)
+    finally:
+        reset_request_id(token)
+    response.headers["X-Request-ID"] = request_id
+    return response
 
 
 @app.get("/", tags=["system"], summary="API Root")

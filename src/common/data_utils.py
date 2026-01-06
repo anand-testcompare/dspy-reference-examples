@@ -12,9 +12,10 @@ from .paths import (
     get_test_data_path,
     get_train_data_path,
 )
+from .types import ClassificationType
 
 
-def _load_split(path: Path, classification_type: str) -> list[dict]:
+def _load_split(path: Path, classification_type: ClassificationType) -> list[dict]:
     if not path.exists():
         raise FileNotFoundError(
             f"Dataset file '{path}' is missing for classification type '{classification_type}'. "
@@ -26,7 +27,7 @@ def _load_split(path: Path, classification_type: str) -> list[dict]:
 
 
 def prepare_datasets(
-    classification_type: str = DEFAULT_CLASSIFICATION_TYPE,
+    classification_type: ClassificationType = DEFAULT_CLASSIFICATION_TYPE,
 ) -> tuple[list[dspy.Example], list[dspy.Example]]:
     """Load training/test datasets and convert them into DSPy Examples.
 

@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from functools import lru_cache
+import json
+import os
 from pathlib import Path
 
 import dspy
@@ -11,6 +13,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from ..common.classifier import CLASSIFICATION_CONFIGS, ComplaintClassifier
 from ..common.paths import get_classifier_artifact_path
+from ..common.types import ClassificationType
 
 
 class ComplaintRequest(BaseModel):
@@ -71,21 +74,58 @@ class ComplaintResponse(BaseModel):
     classification_type: str = Field(..., description="The type of classification performed")
 
 
-def _load_classifier(model_path: Path, classification_type: str) -> ComplaintClassifier:
+def _update_artifact_model_metadata(model_path: Path, current_model: str) -> None:
+    try:
+        artifact_data = json.loads(model_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return
+
+    metadata = artifact_data.get("metadata")
+    saved_model = metadata.get("model") if isinstance(metadata, dict) else None
+    if saved_model == current_model:
+        return
+
+    if not isinstance(metadata, dict):
+        metadata = {}
+        artifact_data["metadata"] = metadata
+    metadata["model"] = current_model
+
+    tmp_path = model_path.with_suffix(f"{model_path.suffix}.tmp")
+    try:
+        tmp_path.write_text(json.dumps(artifact_data, indent=2) + "\n", encoding="utf-8")
+        tmp_path.replace(model_path)
+    except OSError:
+        try:
+            tmp_path.unlink(missing_ok=True)
+        except OSError:
+            pass
+
+
+def _artifact_auto_update_enabled() -> bool:
+    if os.getenv("PYTEST_CURRENT_TEST"):
+        return False
+    flag = os.getenv("DSPY_ARTIFACT_AUTO_UPDATE", "").strip().lower()
+    return flag in {"1", "true", "yes", "on"}
+
+
+def _load_classifier(model_path: Path, classification_type: ClassificationType) -> ComplaintClassifier:
     """Load a classifier for a specific classification type."""
     classifier = ComplaintClassifier(classification_type)
     classifier.load(str(model_path))
+    current_model = getattr(dspy.settings.lm, "model", None)
+    if current_model and _artifact_auto_update_enabled():
+        _update_artifact_model_metadata(model_path, current_model)
     return classifier
 
 
 @lru_cache(maxsize=3)
-def _cached_classifier(model_path: Path, classification_type: str) -> ComplaintClassifier:
+def _cached_classifier(model_path: Path, classification_type: ClassificationType) -> ComplaintClassifier:
     """Cache classifiers by both path and classification type."""
     return _load_classifier(model_path, classification_type)
 
 
 def _create_classification_function(
-    classification_type: str,
+    classification_type: ClassificationType,
     use_cache: bool = True,
 ) -> Callable[[ComplaintRequest], ComplaintResponse]:
     """Create a classification function for a specific classification type."""
@@ -131,6 +171,14 @@ def get_pc_category_classifier(use_cache: bool = True) -> Callable[[PCCategoryRe
     return _create_classification_function("pc-category", use_cache)
 
 
+def get_classification_function(
+    classification_type: ClassificationType = "ae-pc",
+    use_cache: bool = True,
+) -> Callable[[ComplaintRequest], ComplaintResponse]:
+    """Get a classification function for the requested classification type."""
+    return _create_classification_function(classification_type, use_cache)
+
+
 __all__ = [
     "ComplaintRequest",
     "AEPCRequest",
@@ -140,4 +188,5 @@ __all__ = [
     "get_ae_pc_classifier",
     "get_ae_category_classifier",
     "get_pc_category_classifier",
+    "get_classification_function",
 ]
