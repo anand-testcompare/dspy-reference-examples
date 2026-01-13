@@ -57,12 +57,23 @@ cp .env.example .env
 ## Project Setup
 
 ```bash
-uv sync --extra dev         # creates/updates .venv (includes dev tools like pytest/ruff)
+uv sync --extra dev
+```
+```bash
 source .venv/bin/activate
+```
 
 # Generate training data for all classification types
+```bash
 uv run python scripts/datagen/ae_pc_classification_sample_data.py
+```
+```bash
+uv run python scripts/datagen/pc_classification_sample_data.py
+```
+```bash
 uv run python scripts/datagen/adverse_event_sample_data.py
+```
+```bash
 uv run python scripts/datagen/complaint_category_sample_data.py
 ```
 
@@ -125,14 +136,18 @@ when prompted.
 
 Train a classifier for a specific task using the `--classification-type` flag:
 
+### Train AE vs PC classifier (default)
 ```bash
-# Train AE vs PC classifier (default)
 uv run python -m src.pipeline.main --classification-type ae-pc
+```
 
-# Train AE category classifier
+### Train AE category classifier
+```bash
 uv run python -m src.pipeline.main --classification-type ae-category
+```
 
-# Train PC category classifier
+### Train PC category classifier
+```bash
 uv run python -m src.pipeline.main --classification-type pc-category
 ```
 
