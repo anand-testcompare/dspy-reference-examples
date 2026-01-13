@@ -1,11 +1,12 @@
 # DSPy Reference Examples
 
-![Python](https://img.shields.io/badge/Python-3.13+-3776AB?logo=python&logoColor=white)
-![DSPy](https://img.shields.io/badge/DSPy-3.1.0-1F2937)
-![FastAPI](https://img.shields.io/badge/FastAPI-0.128.0-009688?logo=fastapi&logoColor=white)
-![Pydantic](https://img.shields.io/badge/Pydantic-2.12.5-E92063?logo=pydantic&logoColor=white)
-![Ruff](https://img.shields.io/badge/Ruff-0.14.10-FCC21B?logo=ruff&logoColor=000000)
-![uv](https://img.shields.io/badge/uv-0.9.18-0E6F5A)
+[![Python](https://img.shields.io/badge/Python-3.13+-3776AB?logo=python&logoColor=white)](https://docs.python.org/3/)
+[![DSPy](https://img.shields.io/badge/DSPy-3.1.0-1F2937)](https://dspy.ai/)
+[![LiteLLM](https://img.shields.io/badge/LiteLLM-1.72.6-00A67E)](https://docs.litellm.ai/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.128.0-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![Pydantic](https://img.shields.io/badge/Pydantic-2.12.5-E92063?logo=pydantic&logoColor=white)](https://docs.pydantic.dev/latest/)
+[![Ruff](https://img.shields.io/badge/Ruff-0.14.10-FCC21B?logo=ruff&logoColor=000000)](https://docs.astral.sh/ruff/)
+[![uv](https://img.shields.io/badge/uv-0.9.18-0E6F5A)](https://docs.astral.sh/uv/)
 
 Real-world DSPy workflows for pharma/medtech teams. This project provides a flexible multi-classification system for
 Ozempic-related text analysis. Currently supports three classification tasks:
