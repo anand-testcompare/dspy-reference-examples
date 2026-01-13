@@ -8,6 +8,10 @@
 [![Ruff](https://img.shields.io/badge/Ruff-0.14.10-FCC21B?logo=ruff&logoColor=000000)](https://docs.astral.sh/ruff/)
 [![uv](https://img.shields.io/badge/uv-0.9.18-0E6F5A)](https://docs.astral.sh/uv/)
 
+**Models:**
+[![Nemotron-3-Nano-30B](https://img.shields.io/badge/Nemotron--3--Nano--30B-HF_(unsloth_quantized)-76B900?logo=nvidia&logoColor=white)](https://huggingface.co/unsloth/Nemotron-3-Nano-30B-A3B-GGUF)
+[![GPT-OSS-120B](https://img.shields.io/badge/openai/gpt--oss--120b-OpenRouter_(Cerebras)-F76B1C?logo=openai&logoColor=white)](https://openrouter.ai/openai/gpt-oss-120b?sort=throughput)
+
 Real-world DSPy workflows for pharma/medtech teams. This project provides a flexible multi-classification system for
 Ozempic-related text analysis. Currently supports three classification tasks:
 
