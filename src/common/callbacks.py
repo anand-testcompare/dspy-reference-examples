@@ -19,16 +19,12 @@ class LLMRequestLoggingCallback(BaseCallback):
         if messages is None and prompt is not None:
             messages = [{"role": "user", "content": prompt}]
         prompt_breakdown = _build_prompt_breakdown(messages)
-        kwargs = {
-            key: value
-            for key, value in inputs.items()
-            if key not in {"prompt", "messages"}
-        }
+        kwargs = {key: value for key, value in inputs.items() if key not in {"prompt", "messages"}}
         merged_kwargs = {**getattr(instance, "kwargs", {}), **kwargs}
         request_payload = {
+            **merged_kwargs,
             "model": getattr(instance, "model", None),
             "messages": messages,
-            **merged_kwargs,
         }
         extra = {
             "event": "llm_request",
