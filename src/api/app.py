@@ -60,7 +60,8 @@ app = FastAPI(
         "Supports three classification types:\n\n"
         "1. **AE vs PC**: Classify as Adverse Event or Product Complaint\n"
         "2. **AE Category**: Classify adverse events into specific medical categories\n"
-        "3. **PC Category**: Classify product complaints into specific quality/defect categories"
+        "3. **PC Category**: Classify product complaints into specific quality/defect categories\n\n"
+        "**GitHub Repository**: [anand-testcompare/dspy-reference-examples](https://github.com/anand-testcompare/dspy-reference-examples)"
     ),
     lifespan=_lifespan,
     docs_url="/docs",

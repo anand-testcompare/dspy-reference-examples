@@ -13,7 +13,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from .callbacks import LLMRequestLoggingCallback
 
 DEFAULT_MODEL = "nvidia/nemotron-3-nano-30b-a3b:free"
-DEFAULT_LOCAL_MODEL = "Nemotron-3-Nano-30B-A3B-UD-Q3_K_XL"
+DEFAULT_LOCAL_MODEL = "Nemotron-3-Nano-30B-A3B-UD-Q3_K_XL.gguf"
 DEFAULT_OPENROUTER_BASE = "https://openrouter.ai/api/v1"
 DEFAULT_LOCAL_BASE = "http://localhost:8080/v1"
 DEFAULT_CACHE_DIR = Path("data/.dspy_cache")
@@ -83,7 +83,7 @@ def _prompt_logging_enabled() -> bool:
 def load_llm_config() -> LLMConfig:
     """Load LM configuration from environment variables."""
 
-    env = EnvironmentSettings()
+    env = EnvironmentSettings()  # pyright: ignore[reportCallIssue]
     provider = env.provider.lower()
 
     if provider == "local":
