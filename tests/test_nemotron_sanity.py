@@ -128,7 +128,7 @@ if __name__ == "__main__":
     print("=" * 60)
 
     print("\n1. Testing config...")
-    cfg = test_config_loads()
+    cfg = test_config_loads()  # pyright: ignore[reportCallIssue]
     print("   ✓ Config OK")
 
     print("\n2. Testing raw API call to llama.cpp...")
@@ -136,11 +136,11 @@ if __name__ == "__main__":
     print("   ✓ Raw API OK")
 
     print("\n3. Testing DSPy basic completion...")
-    test_nemotron_basic_completion()
+    test_nemotron_basic_completion()  # pyright: ignore[reportCallIssue]
     print("   ✓ Basic completion OK")
 
     print("\n4. Testing DSPy Predict...")
-    test_nemotron_dspy_predict()
+    test_nemotron_dspy_predict()  # pyright: ignore[reportCallIssue]
     print("   ✓ DSPy Predict OK")
 
     print("\n" + "=" * 60)
