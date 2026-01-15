@@ -29,7 +29,7 @@ The framework shows how to:
 - Persist tuned artifacts to disk (separate from source)
 - Serve classifiers via FastAPI with typed Pydantic contracts
 
-### Architecture overview
+## Architecture overview
 
 ![DSPy pipeline and serving flow](assets/excalidraw-flow-from-video.png)
 
