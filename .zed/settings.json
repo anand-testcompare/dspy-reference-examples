@@ -1,0 +1,14 @@
+{
+  "file_scan_exclusions": [
+    "**/.git",
+    // "**/.venv",
+    "**/venv",
+    "**/__pycache__",
+    "**/.mypy_cache",
+    "**/node_modules",
+    "**/.ruff_cache",
+    "**/.pytest_cache",
+    "**/dspy_reference_examples.egg-info",
+    "**/.dspy_cache"
+  ]
+}

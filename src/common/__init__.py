@@ -2,6 +2,7 @@
 
 from .classifier import (
     CLASSIFICATION_CONFIGS,
+    ClassificationConfig,
     ComplaintClassifier,
     classification_metric,
     create_classification_signature,
@@ -15,7 +16,6 @@ from .config import (
     load_llm_config,
 )
 from .data_utils import prepare_datasets
-from .logging import configure_logging
 from .paths import (
     ARTIFACTS_DIR,
     CLASSIFICATION_TYPES,
@@ -27,10 +27,11 @@ from .paths import (
     get_test_data_path,
     get_train_data_path,
 )
-from .types import CLASSIFICATION_TYPE_VALUES, ClassificationType
+from .types import ClassificationType
 
 __all__ = [
     "CLASSIFICATION_CONFIGS",
+    "ClassificationConfig",
     "create_classification_signature",
     "ComplaintClassifier",
     "classification_metric",
@@ -40,14 +41,12 @@ __all__ = [
     "DEFAULT_CACHE_DIR",
     "LLMConfig",
     "load_llm_config",
-    "configure_logging",
     "prepare_datasets",
     "ROOT_DIR",
     "DATA_DIR",
     "ARTIFACTS_DIR",
     "CLASSIFICATION_TYPES",
     "DEFAULT_CLASSIFICATION_TYPE",
-    "CLASSIFICATION_TYPE_VALUES",
     "ClassificationType",
     "get_classification_data_dir",
     "get_train_data_path",

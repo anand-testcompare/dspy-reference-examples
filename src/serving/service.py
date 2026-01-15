@@ -13,7 +13,6 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from ..common.classifier import CLASSIFICATION_CONFIGS, ComplaintClassifier
 from ..common.config import get_display_model_name
-from ..common.logging import reset_classification_type, set_classification_type
 from ..common.paths import get_classifier_artifact_path
 from ..common.types import ClassificationType
 
@@ -131,12 +130,10 @@ def _create_classification_function(
     use_cache: bool = True,
 ) -> Callable[[ComplaintRequest], ComplaintResponse]:
     """Create a classification function for a specific classification type."""
-
-    # Validate classification type
     if classification_type not in CLASSIFICATION_CONFIGS:
         raise ValueError(
             f"Invalid classification type: {classification_type}. "
-            f"Valid types: {', '.join(CLASSIFICATION_CONFIGS.keys())}"
+            f"Valid types: {', '.join(t.value for t in ClassificationType)}"
         )
 
     model_path = get_classifier_artifact_path(classification_type)
@@ -148,37 +145,33 @@ def _create_classification_function(
         classifier = _load_classifier(resolved_path, classification_type)
 
     def _predict(request: ComplaintRequest) -> ComplaintResponse:
-        token = set_classification_type(classification_type)
-        try:
-            prediction: dspy.Prediction = classifier(complaint=request.complaint)
-            return ComplaintResponse(
-                classification=prediction.classification,
-                justification=prediction.justification,
-                classification_type=classification_type,
-            )
-        finally:
-            reset_classification_type(token)
+        prediction: dspy.Prediction = classifier(complaint=request.complaint)
+        return ComplaintResponse(
+            classification=prediction.classification,
+            justification=prediction.justification,
+            classification_type=classification_type,
+        )
 
     return _predict
 
 
 def get_ae_pc_classifier(use_cache: bool = True) -> Callable[[AEPCRequest], ComplaintResponse]:
     """Get classifier for Adverse Event vs Product Complaint classification."""
-    return _create_classification_function("ae-pc", use_cache)
+    return _create_classification_function(ClassificationType.AE_PC, use_cache)
 
 
 def get_ae_category_classifier(use_cache: bool = True) -> Callable[[AECategoryRequest], ComplaintResponse]:
     """Get classifier for Adverse Event category classification."""
-    return _create_classification_function("ae-category", use_cache)
+    return _create_classification_function(ClassificationType.AE_CATEGORY, use_cache)
 
 
 def get_pc_category_classifier(use_cache: bool = True) -> Callable[[PCCategoryRequest], ComplaintResponse]:
     """Get classifier for Product Complaint category classification."""
-    return _create_classification_function("pc-category", use_cache)
+    return _create_classification_function(ClassificationType.PC_CATEGORY, use_cache)
 
 
 def get_classification_function(
-    classification_type: ClassificationType = "ae-pc",
+    classification_type: ClassificationType = ClassificationType.AE_PC,
     use_cache: bool = True,
 ) -> Callable[[ComplaintRequest], ComplaintResponse]:
     """Get a classification function for the requested classification type."""
