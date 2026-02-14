@@ -2,6 +2,8 @@
 
 This repository now ships CI/CD workflows that validate one container contract and publish immutable images for both Railway-compatible and Foundry registries.
 
+Verification note: workflow chain was validated end-to-end on 2026-02-14.
+
 ## Workflows
 
 - `.github/workflows/ci.yml`
