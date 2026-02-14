@@ -1,0 +1,79 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  test-and-validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Install dependencies
+        run: uv sync --extra dev
+
+      - name: Run test suite
+        run: |
+          mkdir -p reports
+          uv run pytest -q --junitxml=reports/junit.xml
+
+      - name: Generate and validate Foundry OpenAPI artifact
+        run: |
+          uv run python scripts/deploy/foundry_openapi.py \
+            --generate \
+            --spec-path openapi.foundry.json \
+            --server-url http://localhost:5000
+          uv run python scripts/deploy/foundry_openapi.py \
+            --spec-path openapi.foundry.json \
+            --server-url http://localhost:5000
+          git diff --exit-code -- openapi.foundry.json
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build image with Foundry OpenAPI label
+        run: |
+          OPENAPI_JSON="$(uv run python -c 'import json; print(json.dumps(json.load(open("openapi.foundry.json", encoding="utf-8")), separators=(",", ":")))')"
+          docker buildx build \
+            --platform linux/amd64 \
+            --build-arg SERVER_OPENAPI="${OPENAPI_JSON}" \
+            --tag dspy-reference-examples:ci \
+            --load \
+            .
+
+      - name: Validate image metadata contract
+        run: |
+          uv run python scripts/deploy/foundry_openapi.py \
+            --spec-path openapi.foundry.json \
+            --image-ref dspy-reference-examples:ci \
+            --server-url http://localhost:5000
+
+      - name: Run Docker portability smoke test
+        run: BUILD_IMAGE=0 IMAGE_NAME=dspy-reference-examples:ci bash scripts/test_docker_portability.sh
+
+      - name: Upload CI reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-reports
+          path: |
+            reports/junit.xml
+            openapi.foundry.json
+          if-no-files-found: warn

@@ -1,0 +1,131 @@
+name: Publish Platform Images
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Resolve immutable tags
+        id: tags
+        env:
+          GHCR_IMAGE: ghcr.io/${{ github.repository }}
+          FOUNDRY_REGISTRY_HOST: ${{ secrets.FOUNDRY_REGISTRY_HOST }}
+          FOUNDRY_DOCKER_IMAGE_NAME: ${{ secrets.FOUNDRY_DOCKER_IMAGE_NAME }}
+        run: |
+          set -euo pipefail
+          : "${FOUNDRY_REGISTRY_HOST:?missing FOUNDRY_REGISTRY_HOST secret}"
+          : "${FOUNDRY_DOCKER_IMAGE_NAME:?missing FOUNDRY_DOCKER_IMAGE_NAME secret}"
+
+          image_tag="$(date -u +%Y%m%d-%H%M%S)-${GITHUB_SHA::7}"
+          short_sha="${GITHUB_SHA::12}"
+          foundry_image="${FOUNDRY_REGISTRY_HOST}/${FOUNDRY_DOCKER_IMAGE_NAME}"
+
+          {
+            echo "ghcr_image=${GHCR_IMAGE}"
+            echo "foundry_image=${foundry_image}"
+            echo "image_tag=${image_tag}"
+            echo "tags<<EOF"
+            echo "${GHCR_IMAGE}:${image_tag}"
+            echo "${GHCR_IMAGE}:main-${short_sha}"
+            echo "${foundry_image}:${image_tag}"
+            echo "${foundry_image}:main-${short_sha}"
+            echo "EOF"
+          } >> "${GITHUB_OUTPUT}"
+
+      - name: Generate + validate Foundry OpenAPI artifact
+        run: |
+          uv run python scripts/deploy/foundry_openapi.py \
+            --generate \
+            --spec-path openapi.foundry.json \
+            --server-url http://localhost:5000
+          uv run python scripts/deploy/foundry_openapi.py \
+            --spec-path openapi.foundry.json \
+            --server-url http://localhost:5000
+
+      - name: Serialize Foundry OpenAPI label
+        id: openapi
+        run: |
+          value="$(uv run python -c 'import json; print(json.dumps(json.load(open("openapi.foundry.json", encoding="utf-8")), separators=(",", ":")))')"
+          {
+            echo "value<<EOF"
+            echo "${value}"
+            echo "EOF"
+          } >> "${GITHUB_OUTPUT}"
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Login to Foundry registry
+        env:
+          FOUNDRY_ARTIFACT_REPOSITORY_RID: ${{ secrets.FOUNDRY_ARTIFACT_REPOSITORY_RID }}
+          FOUNDRY_TOKEN: ${{ secrets.FOUNDRY_TOKEN }}
+          FOUNDRY_REGISTRY_HOST: ${{ secrets.FOUNDRY_REGISTRY_HOST }}
+        run: |
+          set -euo pipefail
+          : "${FOUNDRY_ARTIFACT_REPOSITORY_RID:?missing FOUNDRY_ARTIFACT_REPOSITORY_RID secret}"
+          : "${FOUNDRY_TOKEN:?missing FOUNDRY_TOKEN secret}"
+          : "${FOUNDRY_REGISTRY_HOST:?missing FOUNDRY_REGISTRY_HOST secret}"
+          echo "${FOUNDRY_TOKEN}" | docker login -u "${FOUNDRY_ARTIFACT_REPOSITORY_RID}" --password-stdin "${FOUNDRY_REGISTRY_HOST}"
+
+      - name: Build once and publish to GHCR + Foundry
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: ${{ steps.tags.outputs.tags }}
+          build-args: |
+            SERVER_OPENAPI=${{ steps.openapi.outputs.value }}
+          provenance: false
+          sbom: false
+
+      - name: Workflow summary
+        if: always()
+        run: |
+          {
+            echo "## Platform Image Publish"
+            echo ""
+            echo "- Event: \`${GITHUB_EVENT_NAME}\`"
+            echo "- GHCR image: \`${{ steps.tags.outputs.ghcr_image }}\`"
+            echo "- Foundry image: \`${{ steps.tags.outputs.foundry_image }}\`"
+            echo "- Immutable tag: \`${{ steps.tags.outputs.image_tag }}\`"
+            echo "- Tags:"
+            while IFS= read -r tag; do
+              [[ -z "${tag}" ]] && continue
+              echo "  - \`${tag}\`"
+            done <<'TAGS'
+          ${{ steps.tags.outputs.tags }}
+          TAGS
+            echo "- Digest: \`${{ steps.build.outputs.digest }}\`"
+          } >> "${GITHUB_STEP_SUMMARY}"

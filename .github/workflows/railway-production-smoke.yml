@@ -1,0 +1,140 @@
+name: Railway Production Smoke
+
+on:
+  deployment_status:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: "Optional base URL override"
+        required: false
+        type: string
+      deploy_sha:
+        description: "Optional commit SHA override"
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  production-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (
+        github.event_name == 'deployment_status' &&
+        github.event.deployment_status.state == 'success' &&
+        github.event.deployment.transient_environment == false &&
+        contains(github.event.deployment.environment, 'production')
+      )
+    env:
+      SERVICE_SLUG: ${{ vars.RAILWAY_SERVICE_SLUG || github.event.repository.name }}
+      DEPLOY_SHA: ${{ inputs.deploy_sha || github.event.deployment.sha || github.sha }}
+
+    steps:
+      - name: Resolve base URL
+        id: resolve_base
+        run: |
+          if [ -n "${{ inputs.base_url }}" ]; then
+            echo "base_url=${{ inputs.base_url }}" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          DEPLOYMENT_ENVIRONMENT="${{ github.event.deployment.environment }}"
+          if [ -z "$DEPLOYMENT_ENVIRONMENT" ]; then
+            echo "Missing deployment environment in event payload"
+            exit 1
+          fi
+
+          ENVIRONMENT_SLUG="${DEPLOYMENT_ENVIRONMENT#*/ }"
+          BASE_URL="https://${SERVICE_SLUG}-${ENVIRONMENT_SLUG}.up.railway.app"
+
+          if [ -z "$BASE_URL" ]; then
+            echo "Unable to resolve service domain from deployment payload"
+            exit 1
+          fi
+
+          echo "base_url=${BASE_URL%/}" >> "$GITHUB_OUTPUT"
+
+      - name: Validate deployment context
+        env:
+          BASE_URL: ${{ steps.resolve_base.outputs.base_url }}
+        run: |
+          if [ -z "$BASE_URL" ]; then
+            echo "Unable to resolve BASE_URL from deployment_status payload."
+            echo "Use workflow_dispatch input base_url for manual runs."
+            exit 1
+          fi
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.DEPLOY_SHA }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Setup test dependencies
+        run: uv sync --extra dev
+
+      - name: Wait for production health
+        env:
+          BASE_URL: ${{ steps.resolve_base.outputs.base_url }}
+        run: |
+          ready=0
+          for _ in {1..36}; do
+            if curl -sf "$BASE_URL/health"; then
+              ready=1
+              break
+            fi
+            sleep 10
+          done
+
+          if [ "$ready" -ne 1 ]; then
+            echo "Production service failed to become healthy"
+            exit 1
+          fi
+
+      - name: Run deployed production smoke tests
+        env:
+          BASE_URL: ${{ steps.resolve_base.outputs.base_url }}
+        run: |
+          mkdir -p reports
+          uv run python -m pytest -q tests/routes --junitxml=reports/junit-production.xml
+
+      - name: Upload production smoke report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: railway-production-smoke-junit
+          path: reports/junit-production.xml
+          if-no-files-found: warn
+
+      - name: Upload deployment payload
+        if: failure() && github.event_name == 'deployment_status'
+        run: |
+          python - <<'PY'
+          import json
+          import os
+
+          event_path = os.environ.get("GITHUB_EVENT_PATH")
+          if event_path and os.path.exists(event_path):
+              with open(event_path, "r", encoding="utf-8") as f:
+                  payload = json.load(f)
+              with open("deployment-status-event.json", "w", encoding="utf-8") as out:
+                  json.dump(payload, out, indent=2)
+          PY
+
+      - name: Upload deployment payload artifact
+        if: failure() && github.event_name == 'deployment_status'
+        uses: actions/upload-artifact@v4
+        with:
+          name: railway-production-deployment-status-event
+          path: deployment-status-event.json
+          if-no-files-found: warn

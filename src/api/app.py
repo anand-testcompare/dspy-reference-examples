@@ -120,6 +120,7 @@ def healthcheck() -> dict[str, str | dict]:
 @app.post(
     "/classify/ae-pc",
     response_model=ComplaintResponse,
+    operation_id="classifyAePc",
     summary="Classify as Adverse Event or Product Complaint",
     description=(
         "First-stage classification that determines whether a complaint is "
@@ -141,6 +142,7 @@ def classify_ae_pc(payload: AEPCRequest) -> ComplaintResponse:
 @app.post(
     "/classify/ae-category",
     response_model=ComplaintResponse,
+    operation_id="classifyAeCategory",
     summary="Classify Adverse Event into medical category",
     description=(
         "Second-stage classification for Adverse Events. Classifies into specific medical categories "
@@ -162,6 +164,7 @@ def classify_ae_category(payload: AECategoryRequest) -> ComplaintResponse:
 @app.post(
     "/classify/pc-category",
     response_model=ComplaintResponse,
+    operation_id="classifyPcCategory",
     summary="Classify Product Complaint into quality/defect category",
     description=(
         "Second-stage classification for Product Complaints. Classifies into specific categories "
