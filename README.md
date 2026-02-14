@@ -343,6 +343,10 @@ docker run --rm \
 - The image uses the pre-baked `.venv` from `uv sync --frozen --no-dev` and serves FastAPI on `0.0.0.0:8080`.
 - Mount `$(pwd)/data` to `/data` when you need persistence (e.g., refreshed artifacts, uploads, sqlite files).
 - Override the port by passing `-e PORT=9000`; the default command reads `PORT` and falls back to `8080`.
+- Run portability smoke checks for Railway-like and Foundry-like runtimes:
+  ```bash
+  bash scripts/test_docker_portability.sh
+  ```
 
 ### Deploy to Railway
 
@@ -355,6 +359,30 @@ docker run --rm \
 
 The container always starts via `uvicorn src.api.app:app --host 0.0.0.0 --port ${PORT:-8080}`, matching the local dev
 commands.
+
+---
+
+## 5. Foundry OpenAPI Compute Module Deployment
+
+Generate and validate the Foundry-constrained OpenAPI artifact:
+
+```bash
+uv run python scripts/deploy/foundry_openapi.py --generate --spec-path openapi.foundry.json
+uv run python scripts/deploy/foundry_openapi.py --spec-path openapi.foundry.json
+```
+
+The generated Foundry profile uses `servers: [{"url":"http://localhost:5000"}]`.
+
+Validate both the spec and a built image (checks `linux/amd64`, numeric non-root user, and `server.openapi` label):
+
+```bash
+uv run python scripts/deploy/foundry_openapi.py \
+  --spec-path openapi.foundry.json \
+  --image-ref "<registry>/<repo>/<image>:<tag>"
+```
+
+Full build/push/import sequence is in `docs/foundry-openapi-runbook.md`.
+GitHub workflow automation and required secrets/variables are documented in `docs/deploy-ci.md`.
 
 ---
 

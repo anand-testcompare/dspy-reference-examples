@@ -1,0 +1,194 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "DSPy Complaint Classifier API",
+    "version": "0.3.0",
+    "description": "Multi-stage complaint classification API for Ozempic-related issues. Supports three classification types:\n\n1. **AE vs PC**: Classify as Adverse Event or Product Complaint\n2. **AE Category**: Classify adverse events into specific medical categories\n3. **PC Category**: Classify product complaints into specific quality/defect categories\n\n**GitHub Repository**: [anand-testcompare/dspy-reference-examples](https://github.com/anand-testcompare/dspy-reference-examples)\n**Learn More**: [shpit.dev/learn](https://shpit.dev/learn)"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5000"
+    }
+  ],
+  "paths": {
+    "/classify/ae-pc": {
+      "post": {
+        "operationId": "classifyAePc",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplaintResponse"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Classify as Adverse Event or Product Complaint",
+        "description": "First-stage classification that determines whether a complaint is an Adverse Event (medical/health issue) or a Product Complaint (quality/defect issue).",
+        "tags": [
+          "classification"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AEPCRequest"
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/classify/ae-category": {
+      "post": {
+        "operationId": "classifyAeCategory",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplaintResponse"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Classify Adverse Event into medical category",
+        "description": "Second-stage classification for Adverse Events. Classifies into specific medical categories such as Gastrointestinal disorders, Pancreatitis, Hypoglycemia, etc.",
+        "tags": [
+          "classification"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AECategoryRequest"
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/classify/pc-category": {
+      "post": {
+        "operationId": "classifyPcCategory",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplaintResponse"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Classify Product Complaint into quality/defect category",
+        "description": "Second-stage classification for Product Complaints. Classifies into specific categories such as Device malfunction, Storage/Temperature excursion, Packaging defect, etc.",
+        "tags": [
+          "classification"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PCCategoryRequest"
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AECategoryRequest": {
+        "properties": {
+          "complaint": {
+            "type": "string",
+            "title": "Complaint",
+            "description": "Raw complaint text"
+          }
+        },
+        "type": "object",
+        "required": [
+          "complaint"
+        ],
+        "title": "AECategoryRequest",
+        "description": "Request for classifying Adverse Event into a specific category.",
+        "example": {
+          "complaint": "I developed pancreatitis after using Ozempic for 3 months."
+        }
+      },
+      "AEPCRequest": {
+        "properties": {
+          "complaint": {
+            "type": "string",
+            "title": "Complaint",
+            "description": "Raw complaint text"
+          }
+        },
+        "type": "object",
+        "required": [
+          "complaint"
+        ],
+        "title": "AEPCRequest",
+        "description": "Request for classifying as Adverse Event or Product Complaint.",
+        "example": {
+          "complaint": "I experienced severe nausea and vomiting after taking Ozempic."
+        }
+      },
+      "ComplaintResponse": {
+        "properties": {
+          "classification": {
+            "type": "string",
+            "title": "Classification"
+          },
+          "justification": {
+            "type": "string",
+            "title": "Justification"
+          },
+          "classification_type": {
+            "type": "string",
+            "title": "Classification Type",
+            "description": "The type of classification performed"
+          }
+        },
+        "type": "object",
+        "required": [
+          "classification",
+          "justification",
+          "classification_type"
+        ],
+        "title": "ComplaintResponse",
+        "description": "Structured prediction response."
+      },
+      "PCCategoryRequest": {
+        "properties": {
+          "complaint": {
+            "type": "string",
+            "title": "Complaint",
+            "description": "Raw complaint text"
+          }
+        },
+        "type": "object",
+        "required": [
+          "complaint"
+        ],
+        "title": "PCCategoryRequest",
+        "description": "Request for classifying Product Complaint into a specific category.",
+        "example": {
+          "complaint": "The medication arrived warm, temperature control was not maintained during shipping."
+        }
+      }
+    }
+  }
+}
