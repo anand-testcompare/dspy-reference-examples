@@ -4,12 +4,14 @@ This runbook captures the full M1-M7 flow for the FastAPI compute module import 
 
 For the conceptual overview and screenshots of the import UX, see `docs/foundry-auto-deploy.md`.
 
-## Locked Targets
+## Targets (Fill In)
 
-- `FOUNDRY_URL=https://23dimethyl.usw-3.palantirfoundry.com`
-- `COMPUTE_MODULE_RID=ri.foundry.main.deployed-app.72637ae9-ceb5-4fdc-890f-10fdbfe72db0`
-- `FOUNDRY_REPOSITORY=pharma-classifier-dspy`
-- `FOUNDRY_PROJECT_PATH=/23dimethyl-7809be/Open Ontology (ontologydev.com)/tutorials/dspy-reference-examples`
+Replace these with values from your Foundry enrollment:
+
+- `FOUNDRY_URL=https://<your-stack>.palantirfoundry.com`
+- `COMPUTE_MODULE_RID=ri.foundry.main.deployed-app.<uuid>`
+- `FOUNDRY_REPOSITORY=<artifact-repository-name>`
+- `FOUNDRY_PROJECT_PATH=/<project>/<folder>/<repo>`
 
 ## Image Naming Contract
 
