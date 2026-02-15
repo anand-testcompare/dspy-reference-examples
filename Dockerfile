@@ -16,6 +16,11 @@ RUN uv sync --frozen --no-dev
 COPY src ./src
 COPY artifacts ./artifacts
 
+# Pre-warm tiktoken encoding cache during build so the runtime does not
+# need outbound access to openaipublic.blob.core.windows.net.
+RUN mkdir -p /app/.tiktoken_cache \
+    && TIKTOKEN_CACHE_DIR=/app/.tiktoken_cache python -c 'import tiktoken; tiktoken.get_encoding("cl100k_base")'
+
 
 FROM python:3.13-slim AS runtime
 
@@ -23,7 +28,8 @@ ARG SERVER_OPENAPI="{}"
 
 ENV PYTHONUNBUFFERED=1 \
     PATH="/app/.venv/bin:${PATH}" \
-    PYTHONPATH="/app"
+    PYTHONPATH="/app" \
+    TIKTOKEN_CACHE_DIR="/app/.tiktoken_cache"
 
 WORKDIR /app
 
@@ -33,9 +39,10 @@ RUN groupadd --gid 5000 app \
 COPY --from=builder --chown=5000:5000 /app/.venv /app/.venv
 COPY --from=builder --chown=5000:5000 /app/src ./src
 COPY --from=builder --chown=5000:5000 /app/artifacts ./artifacts
+COPY --from=builder --chown=5000:5000 /app/.tiktoken_cache /app/.tiktoken_cache
 COPY --chown=5000:5000 pyproject.toml uv.lock README.md ./
 
-RUN mkdir -p /app/data/.dspy_cache && chown -R 5000:5000 /app
+RUN mkdir -p /app/data/.dspy_cache /app/.tiktoken_cache && chown -R 5000:5000 /app
 
 LABEL server.openapi="${SERVER_OPENAPI}"
 
