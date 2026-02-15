@@ -19,7 +19,7 @@ COPY artifacts ./artifacts
 # Pre-warm tiktoken encoding cache during build so the runtime does not
 # need outbound access to openaipublic.blob.core.windows.net.
 RUN mkdir -p /app/.tiktoken_cache \
-    && TIKTOKEN_CACHE_DIR=/app/.tiktoken_cache python -c 'import tiktoken; tiktoken.get_encoding("cl100k_base")'
+    && TIKTOKEN_CACHE_DIR=/app/.tiktoken_cache /app/.venv/bin/python -c 'import tiktoken; tiktoken.get_encoding("cl100k_base")'
 
 
 FROM python:3.13-slim AS runtime
